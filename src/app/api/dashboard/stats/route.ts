@@ -69,13 +69,13 @@ export async function GET() {
       const tomorrow = new Date(today)
       tomorrow.setDate(tomorrow.getDate() + 1)
 
-      // Get total azkar completed
-      const totalAzkarCompleted = await prisma.azkarProgress.aggregate({
+      // Get total azkar completed (count of completed azkar items)
+      const totalAzkarCompleted = await prisma.azkarProgress.count({
         where: {
-          userId
-        },
-        _sum: {
-          completed: true
+          userId,
+          completed: {
+            gte: 1
+          }
         }
       })
 
@@ -120,7 +120,7 @@ export async function GET() {
         }
       })
 
-      // Group by category
+      // Group by category and calculate progress
       const categoryProgress = todayAzkarProgress.reduce((acc: any, progress: any) => {
         const categoryName = progress.azkar.category.name
         if (!acc[categoryName]) {
@@ -140,6 +140,28 @@ export async function GET() {
         ...category,
         percentage: category.total > 0 ? (category.completed / category.total) * 100 : 0
       }))
+
+      // Get today's tasbih progress
+      const todayTasbihCounts = await prisma.tasbihCount.findMany({
+        where: {
+          userId,
+          date: {
+            gte: today,
+            lt: tomorrow
+          }
+        }
+      })
+
+      // Add tasbih progress to today's progress
+      if (todayTasbihCounts.length > 0) {
+        const totalTasbihToday = todayTasbihCounts.reduce((sum, count) => sum + count.count, 0)
+        todayAzkarProgressArray.push({
+          categoryName: "Tasbih",
+          completed: totalTasbihToday,
+          total: 100, // Default target
+          percentage: Math.min((totalTasbihToday / 100) * 100, 100)
+        })
+      }
 
       // Get recent tasbih counts
       const recentTasbihCounts = await prisma.tasbihCount.findMany({

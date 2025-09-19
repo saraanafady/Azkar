@@ -11,7 +11,8 @@ import {
   Calendar,
   Star,
   CheckCircle,
-  Clock
+  Clock,
+  RefreshCw
 } from "lucide-react"
 import Link from "next/link"
 
@@ -42,6 +43,7 @@ export default function DashboardPage() {
   const { data: session, status } = useSession()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -49,8 +51,11 @@ export default function DashboardPage() {
     }
   }, [status])
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = async (isRefresh = false) => {
     try {
+      if (isRefresh) {
+        setRefreshing(true)
+      }
       const response = await fetch('/api/dashboard/stats')
       if (response.ok) {
         const data = await response.json()
@@ -60,13 +65,20 @@ export default function DashboardPage() {
       console.error('Error fetching dashboard stats:', error)
     } finally {
       setLoading(false)
+      if (isRefresh) {
+        setRefreshing(false)
+      }
     }
+  }
+
+  const handleRefresh = () => {
+    fetchDashboardStats(true)
   }
 
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -75,24 +87,24 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome to Azkar Dashboard
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            مرحباً بك في لوحة تحكم الأذكار
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            You're viewing the demo version. Sign in to access your personal data.
+          <p className="text-muted-foreground mb-6">
+            أنت تشاهد النسخة التجريبية. سجل الدخول للوصول إلى بياناتك الشخصية.
           </p>
           <div className="space-x-4">
             <Link
               href="/auth/signin"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors"
             >
-              Sign In
+              تسجيل الدخول
             </Link>
             <Link
               href="/auth/signup"
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-success hover:bg-success/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
-              Sign Up
+              إنشاء حساب
             </Link>
           </div>
         </div>
@@ -104,14 +116,14 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Error loading dashboard
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            خطأ في تحميل لوحة التحكم
           </h1>
           <button
-            onClick={fetchDashboardStats}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            onClick={() => fetchDashboardStats()}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors"
           >
-            Try Again
+            حاول مرة أخرى
           </button>
         </div>
       </div>
@@ -119,26 +131,40 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2"
-          >
-            Welcome back, {session?.user?.name}!
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl text-gray-600 dark:text-gray-300"
-          >
-            Here's your spiritual progress overview
-          </motion.p>
+          <div className="flex items-center justify-between">
+            <div>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-3xl md:text-4xl font-bold text-foreground mb-2"
+              >
+                مرحباً بعودتك، {session?.user?.name}!
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-xl text-muted-foreground"
+              >
+                إليك نظرة عامة على تقدمك الروحي
+              </motion.p>
+            </div>
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              onClick={() => handleRefresh()}
+              disabled={refreshing}
+              className="p-3 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </motion.button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -147,17 +173,17 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+            className="bg-card rounded-xl shadow-lg p-6"
           >
             <div className="flex items-center">
-              <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg">
-                <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+              <div className="bg-primary/10 p-3 rounded-lg">
+                <BookOpen className="w-6 h-6 text-primary" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  Azkar Completed
+                <p className="text-sm font-medium text-muted-foreground">
+                  الأذكار المكتملة
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {stats.totalAzkarCompleted}
                 </p>
               </div>
@@ -168,17 +194,17 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+            className="bg-card rounded-xl shadow-lg p-6"
           >
             <div className="flex items-center">
-              <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
-                <Calculator className="w-6 h-6 text-green-600 dark:text-green-400" />
+              <div className="bg-success/10 p-3 rounded-lg">
+                <Calculator className="w-6 h-6 text-success" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  Total Tasbih
+                <p className="text-sm font-medium text-muted-foreground">
+                  إجمالي السبحة
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {stats.totalTasbihCount}
                 </p>
               </div>
@@ -189,17 +215,17 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+            className="bg-card rounded-xl shadow-lg p-6"
           >
             <div className="flex items-center">
-              <div className="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-lg">
-                <Target className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+              <div className="bg-primary/10 p-3 rounded-lg">
+                <Target className="w-6 h-6 text-primary" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  Streak Days
+                <p className="text-sm font-medium text-muted-foreground">
+                  أيام متتالية
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {stats.streakDays}
                 </p>
               </div>
@@ -210,17 +236,17 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+            className="bg-card rounded-xl shadow-lg p-6"
           >
             <div className="flex items-center">
-              <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              <div className="bg-info/10 p-3 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-info" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  This Week
+                <p className="text-sm font-medium text-muted-foreground">
+                  هذا الأسبوع
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {stats.recentTasbihCounts.length}
                 </p>
               </div>
@@ -234,34 +260,47 @@ export default function DashboardPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+            className="bg-card rounded-xl shadow-lg p-6"
           >
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <Calendar className="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" />
-              Today's Progress
+            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center">
+              <Calendar className="w-5 h-5 mr-2 text-primary" />
+              تقدم اليوم
             </h3>
             
             {stats.todayAzkarProgress.length > 0 ? (
               <div className="space-y-4">
                 {stats.todayAzkarProgress.map((progress, index) => (
-                  <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div key={index} className="border border-border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-gray-900 dark:text-white">
+                      <h4 className="font-semibold text-foreground">
                         {progress.categoryName}
                       </h4>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         {progress.completed}/{progress.total}
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div
-                        className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${progress.percentage}%` }}
-                      ></div>
+                    <div className="w-full bg-muted rounded-full h-3">
+                      <motion.div
+                        className="bg-primary h-3 rounded-full transition-all duration-500"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(progress.percentage, 100)}%` }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                      ></motion.div>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-                      {Math.round(progress.percentage)}% complete
-                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-sm text-muted-foreground">
+                        {Math.round(progress.percentage)}% مكتمل
+                      </p>
+                      <div className="flex items-center text-sm">
+                        <span className="text-primary font-semibold">
+                          {progress.completed}
+                        </span>
+                        <span className="text-muted-foreground mx-1">/</span>
+                        <span className="text-muted-foreground">
+                          {progress.total}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -269,13 +308,13 @@ export default function DashboardPage() {
               <div className="text-center py-8">
                 <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500 dark:text-gray-400">
-                  No progress today. Start your dhikr journey!
+                  لا تقدم اليوم. ابدأ رحلة الذكر!
                 </p>
                 <Link
                   href="/azkar"
                   className="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
                 >
-                  Start Azkar
+                  ابدأ الأذكار
                 </Link>
               </div>
             )}
@@ -286,9 +325,9 @@ export default function DashboardPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+            className="bg-card rounded-xl shadow-lg p-6"
           >
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center">
               <TrendingUp className="w-5 h-5 mr-2 text-green-600 dark:text-green-400" />
               Recent Activity
             </h3>
@@ -296,22 +335,28 @@ export default function DashboardPage() {
             {stats.recentTasbihCounts.length > 0 ? (
               <div className="space-y-3">
                 {stats.recentTasbihCounts.slice(0, 5).map((count) => (
-                  <div key={count.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                  <motion.div
+                    key={count.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex items-center justify-between bg-card border border-border rounded-lg p-3 hover:bg-accent/50 transition-colors"
+                  >
                     <div className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mr-3" />
+                      <CheckCircle className="w-5 h-5 text-success mr-3" />
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">
+                        <p className="font-semibold text-foreground">
                           {count.count} dhikr
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           {new Date(count.date).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <div className="text-green-600 dark:text-green-400 font-bold">
+                    <div className="text-success font-bold">
                       ✓
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             ) : (
@@ -337,10 +382,10 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7 }}
-            className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+            className="mt-8 bg-card rounded-xl shadow-lg p-6"
           >
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-              <Star className="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-400" />
+            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center">
+              <Star className="w-5 h-5 mr-2 text-primary" />
               Bookmarked Azkar
             </h3>
             
@@ -349,15 +394,15 @@ export default function DashboardPage() {
                 <Link
                   key={azkar.id}
                   href="/azkar"
-                  className="block bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                  className="block bg-muted rounded-lg p-4 hover:bg-accent transition-colors border border-border"
                 >
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                  <h4 className="font-semibold text-foreground mb-1">
                     {azkar.title}
                   </h4>
-                  <p className="text-indigo-600 dark:text-indigo-400 text-sm mb-2" dir="rtl">
+                  <p className="text-primary text-sm mb-2" dir="rtl">
                     {azkar.titleAr}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     {azkar.categoryName}
                   </p>
                 </Link>
@@ -375,7 +420,7 @@ export default function DashboardPage() {
         >
           <Link
             href="/azkar"
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
           >
             <BookOpen className="w-8 h-8 mx-auto mb-3" />
             <h3 className="text-lg font-semibold mb-2">Browse Azkar</h3>
@@ -384,7 +429,7 @@ export default function DashboardPage() {
 
           <Link
             href="/tasbih"
-            className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
+            className="bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70 text-white rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
           >
             <Calculator className="w-8 h-8 mx-auto mb-3" />
             <h3 className="text-lg font-semibold mb-2">Digital Tasbih</h3>
@@ -393,7 +438,7 @@ export default function DashboardPage() {
 
           <Link
             href="/azkar"
-            className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
+            className="bg-gradient-to-r from-info to-info/80 hover:from-info/90 hover:to-info/70 text-white rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
           >
             <Target className="w-8 h-8 mx-auto mb-3" />
             <h3 className="text-lg font-semibold mb-2">Set Goals</h3>

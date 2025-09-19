@@ -1,26 +1,201 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light Theme Colors - Updated for modern look */
+  --primary: #f59e0b;
+  --primary-light: #fbbf24;
+  --primary-dark: #d97706;
+  --secondary: #1f2937;
+  --tertiary: #ffffff;
+  --neutral: #6b7280;
+  --success: #10b981;
+  --info: #3b82f6;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  
+  /* Modern gradient colors */
+  --gradient-primary: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  --gradient-dark: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  --gradient-card: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  
+  /* Semantic color mappings for light theme */
+  --background: var(--tertiary);
+  --foreground: var(--secondary);
+  --muted: var(--neutral);
+  --accent: var(--primary);
+  --destructive: var(--error);
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --ring: var(--primary);
+  --card: #ffffff;
+  --card-foreground: var(--secondary);
+  --popover: #ffffff;
+  --popover-foreground: var(--secondary);
+  --primary-foreground: #ffffff;
+  --secondary-foreground: #ffffff;
+  --muted-foreground: var(--neutral);
+  --accent-foreground: #ffffff;
+  --destructive-foreground: #ffffff;
+  --border-foreground: var(--secondary);
+  --input-foreground: var(--secondary);
+  --ring-foreground: var(--primary);
+  --chart-1: var(--primary);
+  --chart-2: var(--success);
+  --chart-3: var(--info);
+  --chart-4: #ff6b6b;
+  --chart-5: #4ecdc4;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+  --color-neutral: var(--neutral);
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border-foreground: var(--border-foreground);
+  --color-input-foreground: var(--input-foreground);
+  --color-ring-foreground: var(--ring-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-arabic: 'Amiri', 'Arabic Typesetting', 'Traditional Arabic', serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Dark Theme Colors - Modern sophisticated look */
+    --primary: #f59e0b;
+    --primary-light: #fbbf24;
+    --primary-dark: #d97706;
+    --secondary: #f3f4f6;
+    --tertiary: #0f172a;
+    --neutral: #94a3b8;
+    --success: #10b981;
+    --info: #3b82f6;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    
+    /* Modern gradient colors for dark theme */
+    --gradient-primary: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --gradient-card: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    
+    /* Semantic color mappings for dark theme */
+    --background: var(--tertiary);
+    --foreground: var(--secondary);
+    --muted: var(--neutral);
+    --accent: var(--primary);
+    --destructive: var(--error);
+    --border: #334155;
+    --input: #1e293b;
+    --ring: var(--primary);
+    --card: #1e293b;
+    --card-foreground: var(--secondary);
+    --popover: #1e293b;
+    --popover-foreground: var(--secondary);
+    --primary-foreground: #0f172a;
+    --secondary-foreground: #0f172a;
+    --muted-foreground: var(--neutral);
+    --accent-foreground: #0f172a;
+    --destructive-foreground: #ffffff;
+    --border-foreground: var(--secondary);
+    --input-foreground: var(--secondary);
+    --ring-foreground: var(--primary);
   }
+}
+
+/* Dark theme class override for manual theme switching */
+.dark {
+  --primary: #f59e0b;
+  --primary-light: #fbbf24;
+  --primary-dark: #d97706;
+  --secondary: #f3f4f6;
+  --tertiary: #0f172a;
+  --neutral: #94a3b8;
+  --success: #10b981;
+  --info: #3b82f6;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  
+  /* Modern gradient colors for dark theme */
+  --gradient-primary: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --gradient-card: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  
+  --background: var(--tertiary);
+  --foreground: var(--secondary);
+  --muted: var(--neutral);
+  --accent: var(--primary);
+  --destructive: var(--error);
+  --border: #334155;
+  --input: #1e293b;
+  --ring: var(--primary);
+  --card: #1e293b;
+  --card-foreground: var(--secondary);
+  --popover: #1e293b;
+  --popover-foreground: var(--secondary);
+  --primary-foreground: #0f172a;
+  --secondary-foreground: #0f172a;
+  --muted-foreground: var(--neutral);
+  --accent-foreground: #0f172a;
+  --destructive-foreground: #ffffff;
+  --border-foreground: var(--secondary);
+  --input-foreground: var(--secondary);
+  --ring-foreground: var(--primary);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Arabic Font Support */
+.font-arabic {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom animations for hero elements */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
 }

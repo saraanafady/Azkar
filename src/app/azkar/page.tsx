@@ -55,7 +55,7 @@ export default function AzkarPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -64,15 +64,15 @@ export default function AzkarPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Error Loading Categories
+          <h2 className="text-2xl font-bold text-foreground mb-4">
+            خطأ في تحميل الفئات
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">{error}</p>
+          <p className="text-muted-foreground mb-6">{error}</p>
           <button
             onClick={fetchCategories}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors"
           >
-            Try Again
+            حاول مرة أخرى
           </button>
         </div>
       </div>
@@ -80,24 +80,24 @@ export default function AzkarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+    <div className="min-h-screen bg-background py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4"
+            className="text-4xl md:text-5xl font-bold text-foreground mb-4"
           >
-            Azkar Collection
+            مجموعة الأذكار
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
+            className="text-xl text-muted-foreground max-w-2xl mx-auto"
           >
-            Explore our comprehensive collection of authentic Islamic remembrance and supplications
+            استكشف مجموعتنا الشاملة من الأذكار والدعوات الإسلامية الموثوقة
           </motion.p>
         </div>
 
@@ -109,37 +109,37 @@ export default function AzkarPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="bg-card rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
                 <Link href={`/azkar/${category.name.toLowerCase()}`}>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-lg">
-                        <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                      <div className="bg-primary/10 p-3 rounded-lg">
+                        <BookOpen className="w-6 h-6 text-primary" />
                       </div>
-                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center text-sm text-muted-foreground">
                         <Star className="w-4 h-4 mr-1" />
                         {category._count.azkar}
                       </div>
                     </div>
                     
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    <h3 className="text-xl font-semibold text-foreground mb-2">
                       {category.name}
                     </h3>
-                    <h4 className="text-lg font-medium text-indigo-600 dark:text-indigo-400 mb-3" dir="rtl">
+                    <h4 className="text-lg font-medium text-primary mb-3" dir="rtl">
                       {category.nameAr}
                     </h4>
                     
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                    <p className="text-muted-foreground text-sm mb-4">
                       {category.description}
                     </p>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {category._count.azkar} azkar
+                      <span className="text-sm text-muted-foreground">
+                        {category._count.azkar} أذكار
                       </span>
-                      <div className="flex items-center text-indigo-600 dark:text-indigo-400 text-sm font-medium">
-                        Explore
+                      <div className="flex items-center text-primary text-sm font-medium">
+                        استكشف
                         <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -153,10 +153,10 @@ export default function AzkarPage() {
             <div className="col-span-full text-center py-12">
               <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No Categories Available
+                لا توجد فئات متاحة
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Categories will appear here once they are loaded.
+                ستظهر الفئات هنا بمجرد تحميلها.
               </p>
             </div>
           )}
@@ -171,13 +171,13 @@ export default function AzkarPage() {
           >
             <Clock className="w-12 h-12 text-indigo-600 dark:text-indigo-400 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              Daily Reminder
+              تذكير يومي
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Set up daily reminders for morning and evening azkar to maintain consistency in your spiritual practice.
+              قم بإعداد تذكيرات يومية لأذكار الصباح والمساء للحفاظ على الاستمرارية في ممارستك الروحية.
             </p>
             <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-              Set Reminders
+              إعداد التذكيرات
             </button>
           </motion.div>
         </div>
