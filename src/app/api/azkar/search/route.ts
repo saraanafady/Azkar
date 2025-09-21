@@ -16,10 +16,10 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     // Get all azkar from comprehensive project data
-    const allAzkar = []
-    const allPages = []
-    const allFeatures = []
-    const allTasbihOptions = []
+    const allAzkar: any[] = []
+    const allPages: any[] = []
+    const allFeatures: any[] = []
+    const allTasbihOptions: any[] = []
     
     // Add pages and features for search
     allPages.push(

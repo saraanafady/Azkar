@@ -27,6 +27,8 @@ interface SearchResult {
   descriptionAr?: string
   href?: string
   type?: string
+  textAr?: string
+  text?: string
 }
 
 interface SearchProps {

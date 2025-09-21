@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSession } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
@@ -221,7 +221,7 @@ const getInitialTasbihOptions = (): TasbihOption[] => [
   }
 ]
 
-export default function TasbihPage() {
+function TasbihContent() {
   const { data: session } = useSession()
   const searchParams = useSearchParams()
   const [tasbihOptions, setTasbihOptions] = useState<TasbihOption[]>(getInitialTasbihOptions())
@@ -1060,5 +1060,17 @@ export default function TasbihPage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+export default function TasbihPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <TasbihContent />
+    </Suspense>
   )
 }
