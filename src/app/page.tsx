@@ -3,190 +3,10 @@
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { BookOpen, Calculator, BarChart3, Heart, Star, Moon, Sun } from "lucide-react"
-import { useState, useEffect } from "react"
-
-interface AzkarItem {
-  id: string
-  text: string
-  counter: number
-}
+import { BookOpen, Calculator, BarChart3, Heart, Star, Moon, Sun, ArrowRight } from "lucide-react"
 
 export default function Home() {
   const { data: session } = useSession()
-  const [morningAzkar, setMorningAzkar] = useState<AzkarItem[]>([])
-  const [eveningAzkar, setEveningAzkar] = useState<AzkarItem[]>([])
-  const [loading, setLoading] = useState(false)
-  const [morningCounters, setMorningCounters] = useState<Record<string, number>>({})
-  const [eveningCounters, setEveningCounters] = useState<Record<string, number>>({})
-  const [clickAnimations, setClickAnimations] = useState<Record<string, boolean>>({})
-
-  useEffect(() => {
-    // Initialize with static fallback data
-    setMorningAzkar(getFallbackMorningAzkar())
-    setEveningAzkar(getFallbackEveningAzkar())
-  }, [])
-
-
-  // Animation functions
-  const triggerClickAnimation = (azkarId: string) => {
-    setClickAnimations(prev => ({
-      ...prev,
-      [azkarId]: true
-    }))
-    setTimeout(() => {
-      setClickAnimations(prev => ({
-        ...prev,
-        [azkarId]: false
-      }))
-    }, 300)
-  }
-
-  // Counter functions with animations
-  const incrementMorningCounter = (azkarId: string) => {
-    const currentCount = morningCounters[azkarId] || 0
-    const azkar = morningAzkar.find(a => a.id === azkarId)
-    if (azkar && currentCount < azkar.counter) {
-      setMorningCounters(prev => ({
-        ...prev,
-        [azkarId]: currentCount + 1
-      }))
-      triggerClickAnimation(azkarId)
-    }
-  }
-
-  const incrementEveningCounter = (azkarId: string) => {
-    const currentCount = eveningCounters[azkarId] || 0
-    const azkar = eveningAzkar.find(a => a.id === azkarId)
-    if (azkar && currentCount < azkar.counter) {
-      setEveningCounters(prev => ({
-        ...prev,
-        [azkarId]: currentCount + 1
-      }))
-      triggerClickAnimation(azkarId)
-    }
-  }
-
-  const resetMorningCounter = (azkarId: string) => {
-    setMorningCounters(prev => ({
-      ...prev,
-      [azkarId]: 0
-    }))
-  }
-
-  const resetEveningCounter = (azkarId: string) => {
-    setEveningCounters(prev => ({
-      ...prev,
-      [azkarId]: 0
-    }))
-  }
-
-  // Fallback data functions
-  const getFallbackMorningAzkar = (): AzkarItem[] => [
-    {
-      id: "morning-1",
-      text: "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
-      counter: 1
-    },
-    {
-      id: "morning-2", 
-      text: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-      counter: 1
-    },
-    {
-      id: "morning-3",
-      text: "اللَّهُمَّ أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
-      counter: 1
-    },
-    {
-      id: "morning-4",
-      text: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
-      counter: 100
-    },
-    {
-      id: "morning-5",
-      text: "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
-      counter: 10
-    },
-    {
-      id: "morning-6",
-      text: "اللَّهُمَّ أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
-      counter: 1
-    },
-    {
-      id: "morning-7",
-      text: "سُبْحَانَ اللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَٰهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ",
-      counter: 33
-    },
-    {
-      id: "morning-8",
-      text: "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
-      counter: 10
-    },
-    {
-      id: "morning-9",
-      text: "اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَٰهَ إِلَّا أَنْتَ",
-      counter: 3
-    },
-    {
-      id: "morning-10",
-      text: "اللَّهُمَّ إِنِّي أَصْبَحْتُ أُشْهِدُكَ وَأُشْهِدُ حَمَلَةَ عَرْشِكَ وَمَلَائِكَتَكَ وَجَمِيعَ خَلْقِكَ أَنَّكَ أَنْتَ اللَّهُ لَا إِلَٰهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ",
-      counter: 1
-    }
-  ]
-
-  const getFallbackEveningAzkar = (): AzkarItem[] => [
-    {
-      id: "evening-1",
-      text: "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
-      counter: 1
-    },
-    {
-      id: "evening-2",
-      text: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", 
-      counter: 1
-    },
-    {
-      id: "evening-3",
-      text: "اللَّهُمَّ أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
-      counter: 1
-    },
-    {
-      id: "evening-4",
-      text: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
-      counter: 100
-    },
-    {
-      id: "evening-5",
-      text: "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
-      counter: 10
-    },
-    {
-      id: "evening-6",
-      text: "اللَّهُمَّ أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
-      counter: 1
-    },
-    {
-      id: "evening-7",
-      text: "سُبْحَانَ اللَّهِ وَالْحَمْدُ لِلَّهِ وَلَا إِلَٰهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ",
-      counter: 33
-    },
-    {
-      id: "evening-8",
-      text: "اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَٰهَ إِلَّا أَنْتَ",
-      counter: 3
-    },
-    {
-      id: "evening-9",
-      text: "اللَّهُمَّ إِنِّي أَمْسَيْتُ أُشْهِدُكَ وَأُشْهِدُ حَمَلَةَ عَرْشِكَ وَمَلَائِكَتَكَ وَجَمِيعَ خَلْقِكَ أَنَّكَ أَنْتَ اللَّهُ لَا إِلَٰهَ إِلَّا أَنْتَ وَحْدَكَ لَا شَرِيكَ لَكَ وَأَنَّ مُحَمَّدًا عَبْدُكَ وَرَسُولُكَ",
-      counter: 1
-    },
-    {
-      id: "evening-10",
-      text: "اللَّهُمَّ بِكَ أَمْسَيْنَا وَبِكَ أَصْبَحْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
-      counter: 1
-    }
-  ]
 
   const features = [
     {
@@ -334,7 +154,7 @@ export default function Home() {
 
       {/* Azkar Section */}
       <section className="py-20 bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               الأذكار اليومية
@@ -344,201 +164,69 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
-              {/* Morning Azkar */}
-              <div className="bg-card rounded-xl p-8 shadow-lg min-h-[600px]">
-                <div className="flex items-center mb-6">
-                  <div className="bg-primary/10 p-3 rounded-lg mr-4">
-                    <Sun className="w-6 h-6 text-primary" />
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Morning Azkar Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="group"
+            >
+              <Link
+                href="/azkar/morning"
+                className="block bg-card rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-border hover:border-primary/50"
+              >
+                <div className="flex items-center justify-center mb-6">
+                  <div className="bg-primary/10 p-4 rounded-full group-hover:bg-primary/20 transition-colors">
+                    <Sun className="w-8 h-8 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground">أذكار الصباح</h3>
                 </div>
-                <div className="space-y-6">
-                  {morningAzkar.slice(0, 5).map((azkar, index) => {
-                    const currentCount = morningCounters[azkar.id] || 0
-                    const isComplete = currentCount >= azkar.counter
-                    const isAnimating = clickAnimations[azkar.id] || false
-                    return (
-                      <motion.div
-                        key={azkar.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: index * 0.1 }}
-                        className={`border-l-4 border-primary pl-4 py-3 bg-card rounded-r-lg cursor-pointer select-none transition-all duration-200 ${
-                          isComplete 
-                            ? 'ring-2 ring-success ring-opacity-50' 
-                            : 'hover:bg-primary/5 hover:shadow-md'
-                        } ${
-                          isAnimating ? 'scale-105 bg-primary/10' : ''
-                        }`}
-                        onClick={() => !isComplete && incrementMorningCounter(azkar.id)}
-                      >
-                        <p className="text-lg text-foreground font-arabic leading-relaxed mb-3 break-words overflow-wrap-anywhere whitespace-normal">
-                          {azkar.text}
-                        </p>
-                        
-                        {/* Progress Bar */}
-                        <div className="mb-3" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm text-muted-foreground">
-                              التقدم: {currentCount} / {azkar.counter}
-                            </span>
-                            <span className="text-sm font-medium text-primary">
-                              {Math.round((currentCount / azkar.counter) * 100)}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <motion.div 
-                              className={`h-2 rounded-full transition-all duration-300 ${
-                                isComplete ? 'bg-success' : 'bg-primary'
-                              }`}
-                              style={{ width: `${Math.min((currentCount / azkar.counter) * 100, 100)}%` }}
-                              animate={isAnimating ? { scaleX: [1, 1.05, 1] } : {}}
-                              transition={{ duration: 0.2 }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Counter Buttons */}
-                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => incrementMorningCounter(azkar.id)}
-                            disabled={isComplete}
-                            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-                              isComplete
-                                ? 'bg-success text-white cursor-not-allowed'
-                                : 'bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 active:scale-95'
-                            }`}
-                          >
-                            {isComplete ? '✓ مكتمل' : 'عد +1'}
-                          </button>
-                          <button
-                            onClick={() => resetMorningCounter(azkar.id)}
-                            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-accent transition-colors"
-                          >
-                            إعادة تعيين
-                          </button>
-                        </div>
-
-                        {/* Tap to count hint */}
-                        {!isComplete && (
-                          <div className="mt-2 text-center">
-                            <p className="text-xs text-muted-foreground">
-                              اضغط في أي مكان على هذه البطاقة للعد
-                            </p>
-                          </div>
-                        )}
-                      </motion.div>
-                    )
-                  })}
+                <h3 className="text-2xl font-bold text-foreground text-center mb-4">
+                  أذكار الصباح
+                </h3>
+                <p className="text-muted-foreground text-center mb-6">
+                  ابدأ يومك بالأذكار الصباحية المباركة
+                </p>
+                <div className="text-center">
+                  <span className="inline-flex items-center text-primary font-semibold group-hover:text-primary/80 transition-colors">
+                    ابدأ الآن
+                    <ArrowRight className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
-                <div className="mt-6 text-center">
-                  <Link
-                    href="/azkar/morning"
-                    className="text-primary font-semibold hover:text-primary/80 transition-colors"
-                  >
-                    عرض جميع أذكار الصباح ←
-                  </Link>
-                </div>
-              </div>
+              </Link>
+            </motion.div>
 
-              {/* Evening Azkar */}
-              <div className="bg-card rounded-xl p-8 shadow-lg min-h-[600px]">
-                <div className="flex items-center mb-6">
-                  <div className="bg-primary/10 p-3 rounded-lg mr-4">
-                    <Moon className="w-6 h-6 text-primary" />
+            {/* Evening Azkar Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="group"
+            >
+              <Link
+                href="/azkar/evening"
+                className="block bg-card rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-border hover:border-primary/50"
+              >
+                <div className="flex items-center justify-center mb-6">
+                  <div className="bg-primary/10 p-4 rounded-full group-hover:bg-primary/20 transition-colors">
+                    <Moon className="w-8 h-8 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground">أذكار المساء</h3>
                 </div>
-                <div className="space-y-6">
-                  {eveningAzkar.slice(0, 5).map((azkar, index) => {
-                    const currentCount = eveningCounters[azkar.id] || 0
-                    const isComplete = currentCount >= azkar.counter
-                    const isAnimating = clickAnimations[azkar.id] || false
-                    return (
-                      <motion.div
-                        key={azkar.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: index * 0.1 }}
-                        className={`border-l-4 border-primary pl-4 py-3 bg-card rounded-r-lg cursor-pointer select-none transition-all duration-200 ${
-                          isComplete 
-                            ? 'ring-2 ring-success ring-opacity-50' 
-                            : 'hover:bg-primary/5 hover:shadow-md'
-                        } ${
-                          isAnimating ? 'scale-105 bg-primary/10' : ''
-                        }`}
-                        onClick={() => !isComplete && incrementEveningCounter(azkar.id)}
-                      >
-                        <p className="text-lg text-foreground font-arabic leading-relaxed mb-3 break-words overflow-wrap-anywhere whitespace-normal">
-                          {azkar.text}
-                        </p>
-                        
-                        {/* Progress Bar */}
-                        <div className="mb-3" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              Progress: {currentCount} / {azkar.counter}
-                            </span>
-                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                              {Math.round((currentCount / azkar.counter) * 100)}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <motion.div 
-                              className={`h-2 rounded-full transition-all duration-300 ${
-                                isComplete ? 'bg-green-500' : 'bg-indigo-500'
-                              }`}
-                              style={{ width: `${Math.min((currentCount / azkar.counter) * 100, 100)}%` }}
-                              animate={isAnimating ? { scaleX: [1, 1.05, 1] } : {}}
-                              transition={{ duration: 0.2 }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Counter Buttons */}
-                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => incrementEveningCounter(azkar.id)}
-                            disabled={isComplete}
-                            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-                              isComplete
-                                ? 'bg-green-500 text-white cursor-not-allowed'
-                                : 'bg-indigo-500 hover:bg-indigo-600 text-white hover:scale-105 active:scale-95'
-                            }`}
-                          >
-                            {isComplete ? '✓ مكتمل' : 'عد +1'}
-                          </button>
-                          <button
-                            onClick={() => resetEveningCounter(azkar.id)}
-                            className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-accent transition-colors"
-                          >
-                            إعادة تعيين
-                          </button>
-                        </div>
-
-                        {/* Tap to count hint */}
-                        {!isComplete && (
-                          <div className="mt-2 text-center">
-                            <p className="text-xs text-muted-foreground">
-                              اضغط في أي مكان على هذه البطاقة للعد
-                            </p>
-                          </div>
-                        )}
-                      </motion.div>
-                    )
-                  })}
+                <h3 className="text-2xl font-bold text-foreground text-center mb-4">
+                  أذكار المساء
+                </h3>
+                <p className="text-muted-foreground text-center mb-6">
+                  أنهِ يومك بالأذكار المسائية المباركة
+                </p>
+                <div className="text-center">
+                  <span className="inline-flex items-center text-primary font-semibold group-hover:text-primary/80 transition-colors">
+                    ابدأ الآن
+                    <ArrowRight className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
-                <div className="mt-6 text-center">
-                  <Link
-                    href="/azkar/evening"
-                    className="text-primary font-semibold hover:text-primary/80 transition-colors"
-                  >
-                    عرض جميع أذكار المساء ←
-                  </Link>
-                </div>
-              </div>
-            </div>
+              </Link>
+            </motion.div>
+          </div>
         </div>
       </section>
 
