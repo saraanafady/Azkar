@@ -48,8 +48,22 @@ export default function Navigation() {
 
   return (
     <>
+      {/* Force mobile menu styles */}
+      <style jsx global>{`
+        .mobile-menu-container {
+          background-color: ${theme === 'dark' ? '#1e293b' : '#ffffff'} !important;
+          color: ${theme === 'dark' ? '#f1f5f9' : '#0f172a'} !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+        }
+        .mobile-menu-content {
+          background-color: ${theme === 'dark' ? '#1e293b' : '#ffffff'} !important;
+          position: relative !important;
+          z-index: 10 !important;
+        }
+      `}</style>
       
-      <nav className="bg-card shadow-lg border-b border-border sticky top-0 z-50">
+      <nav className="bg-card/95 backdrop-blur-sm shadow-lg border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
@@ -165,6 +179,17 @@ export default function Navigation() {
                   WebkitBackdropFilter: 'none'
                 }}
               >
+                {/* Menu Header */}
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <h2 className="text-lg font-semibold text-foreground">القائمة</h2>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
                 {/* Solid background overlay */}
                 <div 
                   className="absolute inset-0 w-full h-full"
@@ -181,17 +206,6 @@ export default function Navigation() {
                     backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff'
                   }}
                 >
-                  {/* Menu Header */}
-                  <div className="flex items-center justify-between p-4 border-b border-border">
-                  <h2 className="text-lg font-semibold text-foreground">القائمة</h2>
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
                   {/* Search Bar */}
                   <div className="p-4 border-b border-border">
                     <SearchComponent className="w-full" />

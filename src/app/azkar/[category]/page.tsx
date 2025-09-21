@@ -88,12 +88,28 @@ export default function AzkarCategoryPage() {
     try {
       const response = await fetch(`/api/azkar/category/${categoryName}`)
       const data = await response.json()
-      setAzkar(data.azkar)
+      
+      // Restore progress and bookmarks from localStorage
+      const azkarWithLocalData = data.azkar.map((item: Azkar) => {
+        const progressKey = `azkar_progress_${item.id}`
+        const bookmarkKey = `azkar_bookmark_${item.id}`
+        
+        const localProgress = localStorage.getItem(progressKey)
+        const isBookmarked = localStorage.getItem(bookmarkKey) === 'true'
+        
+        return {
+          ...item,
+          progress: localProgress ? { completed: parseInt(localProgress) } : null,
+          isBookmarked: isBookmarked
+        }
+      })
+      
+      setAzkar(azkarWithLocalData)
       setCategory(data.category)
       
-      // Initialize progress state
+      // Initialize progress state from localStorage
       const progressState: Record<string, number> = {}
-      data.azkar.forEach((item: Azkar) => {
+      azkarWithLocalData.forEach((item: Azkar) => {
         progressState[item.id] = item.progress?.completed || 0
       })
       setProgress(progressState)
@@ -105,20 +121,11 @@ export default function AzkarCategoryPage() {
   }
 
   const updateProgress = async (azkarId: string, completed: number) => {
-    if (!session) return
-
+    // Since we're using mock data, store progress in localStorage for all users
     try {
-      await fetch('/api/azkar/progress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          azkarId,
-          completed,
-        }),
-      })
-
+      const progressKey = `azkar_progress_${azkarId}`
+      localStorage.setItem(progressKey, completed.toString())
+      
       setProgress(prev => ({
         ...prev,
         [azkarId]: completed
@@ -170,24 +177,23 @@ export default function AzkarCategoryPage() {
   }
 
   const toggleBookmark = async (azkarId: string) => {
-    if (!session) return
-
+    // Since we're using mock data, store bookmarks in localStorage for all users
     try {
-      const response = await fetch('/api/azkar/bookmark', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ azkarId }),
-      })
-
-      if (response.ok) {
-        setAzkar(prev => prev.map(item => 
-          item.id === azkarId 
-            ? { ...item, isBookmarked: !item.isBookmarked }
-            : item
-        ))
+      const bookmarkKey = `azkar_bookmark_${azkarId}`
+      const isCurrentlyBookmarked = localStorage.getItem(bookmarkKey) === 'true'
+      const newBookmarkState = !isCurrentlyBookmarked
+      
+      if (newBookmarkState) {
+        localStorage.setItem(bookmarkKey, 'true')
+      } else {
+        localStorage.removeItem(bookmarkKey)
       }
+      
+      setAzkar(prev => prev.map(item => 
+        item.id === azkarId 
+          ? { ...item, isBookmarked: newBookmarkState }
+          : item
+      ))
     } catch (error) {
       console.error('Error toggling bookmark:', error)
     }

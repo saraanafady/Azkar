@@ -200,7 +200,7 @@ export async function GET() {
       }))
 
       return NextResponse.json({
-        totalAzkarCompleted: totalAzkarCompleted._sum.completed || 0,
+        totalAzkarCompleted: totalAzkarCompleted,
         totalTasbihCount: totalTasbihCount._sum.count || 0,
         streakDays,
         todayAzkarProgress: todayAzkarProgressArray,

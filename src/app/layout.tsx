@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
-import { Inter, Amiri } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import Navigation from "@/components/navigation";
-
-const inter = Inter({ subsets: ["latin"] });
-const amiri = Amiri({ subsets: ["arabic"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
   title: "Azkar - Islamic Remembrance & Tasbih Counter",
@@ -19,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <body className="antialiased">
         <Providers>
           <div className="min-h-screen bg-background text-foreground">
             <Navigation />

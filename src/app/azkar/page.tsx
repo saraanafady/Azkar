@@ -135,9 +135,9 @@ export default function AzkarPage() {
                     </p>
                     
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
+                      {/* <span className="text-sm text-muted-foreground">
                         {category._count.azkar} أذكار
-                      </span>
+                      </span> */}
                       <div className="flex items-center text-primary text-sm font-medium">
                         استكشف
                         <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
