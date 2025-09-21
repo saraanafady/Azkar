@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { RotateCcw, Save, History, Target, Trophy, Star, Zap, Heart, Crown, Sparkles, Quote, ArrowRight } from "lucide-react"
 
@@ -222,6 +223,7 @@ const getInitialTasbihOptions = (): TasbihOption[] => [
 
 export default function TasbihPage() {
   const { data: session } = useSession()
+  const searchParams = useSearchParams()
   const [tasbihOptions, setTasbihOptions] = useState<TasbihOption[]>(getInitialTasbihOptions())
   const [selectedTasbih, setSelectedTasbih] = useState<TasbihOption>(getInitialTasbihOptions()[0])
   const [count, setCount] = useState(0)
@@ -245,6 +247,24 @@ export default function TasbihPage() {
       fetchSavedCounts()
     }
   }, [session])
+
+  // Handle URL parameter for specific tasbih option
+  useEffect(() => {
+    const option = searchParams.get('option')
+    if (option) {
+      const optionToSelect = tasbihOptions.find(opt => opt.id === option)
+      if (optionToSelect) {
+        setSelectedTasbih(optionToSelect)
+        // Scroll to the tasbih section
+        setTimeout(() => {
+          const element = document.getElementById('tasbih-counter')
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }, 500)
+      }
+    }
+  }, [searchParams, tasbihOptions])
 
   useEffect(() => {
     setTarget(selectedTasbih.defaultTarget)
@@ -505,7 +525,7 @@ export default function TasbihPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl text-muted-foreground dark:text-slate-300"
+            className="text-xl text-muted-foreground"
           >
             تتبع ذكرك مع عداد السبحة الرقمي الحديث
           </motion.p>
@@ -518,8 +538,8 @@ export default function TasbihPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-8"
         >
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg p-6 border border-slate-200 dark:border-slate-700">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 text-center">اختر السبحة</h3>
+          <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
+            <h3 className="text-xl font-bold text-foreground mb-4 text-center">اختر السبحة</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {tasbihOptions.map((tasbih) => (
                 <motion.button
@@ -532,7 +552,7 @@ export default function TasbihPage() {
                       ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/50'
                       : tasbih.completed
                       ? 'bg-green-500/20 text-green-600 dark:text-green-400 border-2 border-green-500/30 dark:bg-green-500/10 hover:bg-green-500/30 dark:hover:bg-green-500/20'
-                      : 'bg-slate-100 dark:bg-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-600/50 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-600'
+                      : 'bg-muted hover:bg-muted/80 text-foreground border border-border'
                   }`}
                 >
                   {tasbih.completed && (
@@ -555,13 +575,13 @@ export default function TasbihPage() {
                     </motion.div>
                   )}
                   
-                  <div className="font-arabic text-lg mb-1 text-slate-800 dark:text-slate-100" dir="rtl">
+                  <div className="font-arabic text-lg mb-1 text-foreground" dir="rtl">
                     {tasbih.textAr}
                   </div>
-                  <div className="text-sm opacity-80 text-slate-700 dark:text-slate-200">
+                  <div className="text-sm opacity-80 text-muted-foreground">
                     {tasbih.text}
                   </div>
-                  <div className="text-xs opacity-60 mt-1 text-slate-600 dark:text-slate-300">
+                  <div className="text-xs opacity-60 mt-1 text-muted-foreground">
                     {tasbih.description}
                   </div>
                   
@@ -579,10 +599,11 @@ export default function TasbihPage() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Main Counter */}
           <motion.div
+            id="tasbih-counter"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-2xl p-8 text-center border border-slate-200 dark:border-slate-700"
+            className="bg-card rounded-2xl shadow-2xl p-8 text-center border border-border"
           >
             {/* Selected Tasbih Display */}
             <div className={`mb-8 p-6 rounded-xl transition-all duration-500 ${
@@ -590,13 +611,13 @@ export default function TasbihPage() {
                 ? 'bg-green-500/10 border-2 border-green-500/30 dark:bg-green-500/20 dark:border-green-500/50' 
                 : 'bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30'
             }`}>
-              <div className="font-arabic text-2xl mb-2 text-slate-800 dark:text-slate-100" dir="rtl">
+              <div className="font-arabic text-2xl mb-2 text-foreground" dir="rtl">
                 {selectedTasbih.textAr}
               </div>
               <div className="text-lg text-primary font-medium mb-1">
                 {selectedTasbih.text}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-300">
+              <div className="text-sm text-muted-foreground">
                 {selectedTasbih.description}
               </div>
               {selectedTasbih.completed && (
@@ -609,13 +630,13 @@ export default function TasbihPage() {
 
             {/* Target Setting */}
             <div className="mb-8">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 العدد المستهدف
               </label>
               <div className="flex items-center justify-center space-x-4">
                 <button
                   onClick={() => setTarget(Math.max(1, target - 1))}
-                  className="w-10 h-10 rounded-full bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 flex items-center justify-center transition-all duration-200 border border-slate-300 dark:border-slate-600"
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 text-foreground flex items-center justify-center transition-all duration-200 border border-border"
                 >
                   -
                 </button>
@@ -623,11 +644,11 @@ export default function TasbihPage() {
                   type="number"
                   value={target}
                   onChange={(e) => setTarget(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 text-center text-2xl font-bold text-slate-800 dark:text-slate-100 bg-transparent border-none outline-none"
+                  className="w-20 text-center text-2xl font-bold text-foreground bg-transparent border-none outline-none"
                 />
                 <button
                   onClick={() => setTarget(target + 1)}
-                  className="w-10 h-10 rounded-full bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 flex items-center justify-center transition-all duration-200 border border-slate-300 dark:border-slate-600"
+                  className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 text-foreground flex items-center justify-center transition-all duration-200 border border-border"
                 >
                   +
                 </button>
@@ -635,26 +656,26 @@ export default function TasbihPage() {
             </div>
 
             {/* Auto-Progression Controls */}
-            <div className="mb-8 p-4 bg-primary/5 dark:bg-primary/10 rounded-lg border border-primary/20 dark:border-primary/30">
+            <div className="mb-8 p-4 bg-primary/5 rounded-lg border border-primary/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <ArrowRight className="w-5 h-5 text-primary mr-2" />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">التقدم التلقائي</span>
+                  <span className="text-sm font-medium text-foreground">التقدم التلقائي</span>
                 </div>
                 <button
                   onClick={() => setAutoProgress(!autoProgress)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    autoProgress ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'
+                    autoProgress ? 'bg-primary' : 'bg-muted'
                   }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
                       autoProgress ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
                 </button>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 {autoProgress 
                   ? "سيتقدم تلقائياً إلى السبحة التالية بعد الإكمال" 
                   : "تقدم يدوي - ستبقى على السبحة الحالية"
@@ -681,7 +702,7 @@ export default function TasbihPage() {
                   {count}
                 </motion.div>
                 
-                <div className="text-lg text-slate-600 dark:text-slate-300 mb-2">
+                <div className="text-lg text-muted-foreground mb-2">
                   {getCompletionMessage()}
                 </div>
                 
@@ -692,7 +713,7 @@ export default function TasbihPage() {
 
               {/* Progress Bar */}
               <div className="mb-6">
-                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-4">
+                <div className="w-full bg-muted rounded-full h-4">
                   <motion.div
                     className="bg-primary h-4 rounded-full"
                     initial={{ width: 0 }}
@@ -700,7 +721,7 @@ export default function TasbihPage() {
                     transition={{ duration: 0.5 }}
                   />
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-300 mt-2 text-center">
+                <div className="text-sm text-muted-foreground mt-2 text-center">
                   {Math.round(getProgressPercentage())}% مكتمل
                 </div>
               </div>
@@ -710,7 +731,7 @@ export default function TasbihPage() {
                 <div className="text-2xl font-bold text-primary mb-2">
                   اضغط للعد
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-300">
+                <div className="text-sm text-muted-foreground">
                   {count >= target ? 'مكتمل! اضغط للمتابعة...' : `اضغط في أي مكان للعد (${target - count} أخرى)`}
                 </div>
               </div>
@@ -723,7 +744,7 @@ export default function TasbihPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={resetCount}
-                  className="flex-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center border border-slate-300 dark:border-slate-600"
+                  className="flex-1 bg-muted hover:bg-muted/80 text-foreground font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center border border-border"
                 >
                   <RotateCcw className="w-5 h-5 mr-2" />
                   إعادة تعيين
@@ -735,7 +756,7 @@ export default function TasbihPage() {
                     whileTap={{ scale: 0.95 }}
                     onClick={saveCount}
                     disabled={count === 0}
-                    className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
+                    className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-muted disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl"
                   >
                     <Save className="w-5 h-5 mr-2" />
                     حفظ
@@ -745,8 +766,8 @@ export default function TasbihPage() {
             </div>
 
             {!session && (
-              <div className="mt-6 p-4 bg-primary/10 dark:bg-primary/20 rounded-lg border border-primary/20 dark:border-primary/30">
-                <p className="text-sm text-primary dark:text-primary-foreground">
+              <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <p className="text-sm text-primary">
                   سجل الدخول لحفظ عداداتك وتتبع تقدمك
                 </p>
               </div>
@@ -758,10 +779,10 @@ export default function TasbihPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-slate-700"
+            className="bg-card rounded-2xl shadow-2xl p-6 border border-border"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+              <h3 className="text-2xl font-bold text-foreground">
                 تقدمك
               </h3>
               <button
@@ -775,15 +796,15 @@ export default function TasbihPage() {
 
             {/* Today's Stats */}
             <div className="mb-6">
-              <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-4 border border-primary/20 dark:border-primary/30">
+              <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-                      عد اليوم
-                    </h4>
-                    <p className="text-3xl font-bold text-primary">
-                      {count}
-                    </p>
+                <h4 className="text-lg font-semibold text-foreground">
+                  عد اليوم
+                </h4>
+                <p className="text-3xl font-bold text-primary">
+                  {count}
+                </p>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center text-green-600 dark:text-green-400">
@@ -800,7 +821,7 @@ export default function TasbihPage() {
             {/* History */}
             {showHistory && session && (
               <div>
-                <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">
+                <h4 className="text-lg font-semibold text-foreground mb-4">
                   الأعداد الأخيرة
                 </h4>
                 {savedCounts.length > 0 ? (
@@ -808,13 +829,13 @@ export default function TasbihPage() {
                     {savedCounts.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between bg-slate-100 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-200 dark:border-slate-600"
+                        className="flex items-center justify-between bg-muted rounded-lg p-3 border border-border"
                       >
                         <div>
-                          <p className="font-semibold text-slate-800 dark:text-slate-100">
+                          <p className="font-semibold text-foreground">
                             {item.count} ذكر
                           </p>
-                          <p className="text-sm text-slate-600 dark:text-slate-300">
+                          <p className="text-sm text-muted-foreground">
                             {new Date(item.date).toLocaleDateString()}
                           </p>
                         </div>
@@ -826,7 +847,7 @@ export default function TasbihPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-slate-600 dark:text-slate-300">
+                    <p className="text-muted-foreground">
                       لا توجد أعداد محفوظة بعد. ابدأ العد واحفظ تقدمك!
                     </p>
                   </div>
@@ -836,7 +857,7 @@ export default function TasbihPage() {
 
             {!session && (
               <div className="text-center py-8">
-                <p className="text-slate-600 dark:text-slate-300 mb-4">
+                <p className="text-muted-foreground mb-4">
                   سجل الدخول لعرض سجل تقدمك
                 </p>
                 <a
@@ -900,7 +921,7 @@ export default function TasbihPage() {
               exit={{ opacity: 0, y: 50 }}
               className="fixed inset-0 flex items-center justify-center z-40 pointer-events-none"
             >
-              <div className="bg-slate-50 dark:bg-slate-800 border-2 border-primary/30 px-8 py-6 rounded-2xl shadow-2xl text-center max-w-2xl mx-4">
+              <div className="bg-card border-2 border-primary/30 px-8 py-6 rounded-2xl shadow-2xl text-center max-w-2xl mx-4">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -909,13 +930,13 @@ export default function TasbihPage() {
                 >
                   <Quote className="w-8 h-8 text-primary mx-auto" />
                 </motion.div>
-                <div className="font-arabic text-xl mb-4 text-slate-800 dark:text-slate-100" dir="rtl">
+                <div className="font-arabic text-xl mb-4 text-foreground" dir="rtl">
                   {currentQuote.arabic}
                 </div>
-                <div className="text-lg text-slate-700 dark:text-slate-200 mb-2">
+                <div className="text-lg text-foreground mb-2">
                   {currentQuote.text}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-300">
+                <div className="text-sm text-muted-foreground">
                   {currentQuote.reference}
                 </div>
                 {autoProgress && (
@@ -926,7 +947,7 @@ export default function TasbihPage() {
                     className="mt-4 flex items-center justify-center text-primary"
                   >
                     <ArrowRight className="w-4 h-4 mr-2" />
-                    <span className="text-sm text-slate-600 dark:text-slate-300">Moving to next tasbih...</span>
+                    <span className="text-sm text-muted-foreground">Moving to next tasbih...</span>
                   </motion.div>
                 )}
               </div>
@@ -941,11 +962,11 @@ export default function TasbihPage() {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="mt-8"
         >
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl p-6 border border-slate-700">
+          <div className="bg-card rounded-2xl shadow-2xl p-6 border border-border">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <Trophy className="w-6 h-6 mr-3 text-yellow-400" />
-                <h3 className="text-2xl font-bold text-white">Achievements</h3>
+                <h3 className="text-2xl font-bold text-foreground">Achievements</h3>
               </div>
               <button
                 onClick={() => setShowAchievements(!showAchievements)}
@@ -965,21 +986,21 @@ export default function TasbihPage() {
                     className={`p-4 rounded-xl border-2 transition-all duration-300 ${
                       achievement.unlocked
                         ? 'bg-green-500/10 border-green-500/30 text-green-400'
-                        : 'bg-slate-700/50 border-slate-600 text-slate-400'
+                        : 'bg-muted border-border text-muted-foreground'
                     }`}
                   >
                     <div className="flex items-center mb-3">
                       <Icon className={`w-5 h-5 mr-2 ${
-                        achievement.unlocked ? 'text-green-400' : 'text-slate-400'
+                        achievement.unlocked ? 'text-green-400' : 'text-muted-foreground'
                       }`} />
                       <h4 className={`font-semibold text-sm ${
-                        achievement.unlocked ? 'text-green-400' : 'text-slate-200'
+                        achievement.unlocked ? 'text-green-400' : 'text-foreground'
                       }`}>{achievement.title}</h4>
                     </div>
                     <p className={`text-xs mb-3 ${
-                      achievement.unlocked ? 'text-green-300' : 'text-slate-300'
+                      achievement.unlocked ? 'text-green-300' : 'text-muted-foreground'
                     }`}>{achievement.description}</p>
-                    <div className="w-full bg-slate-600 rounded-full h-1.5 mb-2">
+                    <div className="w-full bg-muted rounded-full h-1.5 mb-2">
                       <motion.div
                         className={`h-1.5 rounded-full ${
                           achievement.unlocked ? 'bg-green-400' : 'bg-yellow-400'
@@ -990,7 +1011,7 @@ export default function TasbihPage() {
                       />
                     </div>
                     <div className={`text-xs ${
-                      achievement.unlocked ? 'text-green-300' : 'text-slate-400'
+                      achievement.unlocked ? 'text-green-300' : 'text-muted-foreground'
                     }`}>
                       {achievement.progress}/{achievement.maxProgress}
                     </div>
@@ -1004,33 +1025,33 @@ export default function TasbihPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-6 pt-6 border-t border-slate-700"
+                className="mt-6 pt-6 border-t border-border"
               >
-                <h4 className="text-lg font-semibold text-white mb-4">Progress Summary</h4>
+                <h4 className="text-lg font-semibold text-foreground mb-4">Progress Summary</h4>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="text-center bg-slate-700/30 rounded-lg p-4">
+                  <div className="text-center bg-muted rounded-lg p-4">
                     <div className="text-2xl font-bold text-yellow-400">
                       {tasbihOptions.filter(t => t.completed).length}
                     </div>
-                    <div className="text-sm text-slate-300">Completed</div>
+                    <div className="text-sm text-muted-foreground">Completed</div>
                   </div>
-                  <div className="text-center bg-slate-700/30 rounded-lg p-4">
+                  <div className="text-center bg-muted rounded-lg p-4">
                     <div className="text-2xl font-bold text-green-400">
                       {userAchievements.filter((a: Achievement) => a.unlocked).length}
                     </div>
-                    <div className="text-sm text-slate-300">Achievements</div>
+                    <div className="text-sm text-muted-foreground">Achievements</div>
                   </div>
-                  <div className="text-center bg-slate-700/30 rounded-lg p-4">
+                  <div className="text-center bg-muted rounded-lg p-4">
                     <div className="text-2xl font-bold text-blue-400">
                       {streak}
                     </div>
-                    <div className="text-sm text-slate-300">Day Streak</div>
+                    <div className="text-sm text-muted-foreground">Day Streak</div>
                   </div>
-                  <div className="text-center bg-slate-700/30 rounded-lg p-4">
+                  <div className="text-center bg-muted rounded-lg p-4">
                     <div className="text-2xl font-bold text-purple-400">
                       {dailyCompleted.length}
                     </div>
-                    <div className="text-sm text-slate-300">Today</div>
+                    <div className="text-sm text-muted-foreground">Today</div>
                   </div>
                 </div>
               </motion.div>

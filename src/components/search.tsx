@@ -276,10 +276,35 @@ export default function SearchComponent({ className = "" }: SearchProps) {
   }
 
   const getResultHref = (result: SearchResult) => {
+    // Direct href for pages
     if (result.href) return result.href
+    
+    // For azkar content, navigate to specific category with search parameter
     if (result.resultType === 'azkar' && result.category) {
-      return getCategoryHref(result.category.name)
+      const categoryHref = getCategoryHref(result.category.name)
+      // Add search parameter to highlight the specific azkar
+      return `${categoryHref}?search=${encodeURIComponent(result.title)}&highlight=${result.id}`
     }
+    
+    // For tasbih options, go to tasbih page with specific option
+    if (result.resultType === 'tasbih') {
+      return `/tasbih?option=${result.id}`
+    }
+    
+    // For features, go to relevant page
+    if (result.resultType === 'feature') {
+      if (result.id === 'bookmark' || result.id === 'progress') {
+        return '/dashboard'
+      } else if (result.id === 'themes') {
+        return '/dashboard?tab=settings'
+      } else if (result.id === 'achievements') {
+        return '/dashboard?tab=achievements'
+      } else if (result.id === 'statistics') {
+        return '/dashboard?tab=statistics'
+      }
+    }
+    
+    // Default fallback
     return '/azkar'
   }
 

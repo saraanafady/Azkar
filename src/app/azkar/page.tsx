@@ -151,11 +151,11 @@ export default function AzkarPage() {
             ))
           ) : (
             <div className="col-span-full text-center py-12">
-              <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 لا توجد فئات متاحة
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-muted-foreground">
                 ستظهر الفئات هنا بمجرد تحميلها.
               </p>
             </div>
@@ -167,16 +167,16 @@ export default function AzkarPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-2xl mx-auto"
+            className="bg-card rounded-xl shadow-lg p-8 max-w-2xl mx-auto border border-border"
           >
-            <Clock className="w-12 h-12 text-indigo-600 dark:text-indigo-400 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            <Clock className="w-12 h-12 text-primary mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-foreground mb-4">
               تذكير يومي
             </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-muted-foreground mb-6">
               قم بإعداد تذكيرات يومية لأذكار الصباح والمساء للحفاظ على الاستمرارية في ممارستك الروحية.
             </p>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+            <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors">
               إعداد التذكيرات
             </button>
           </motion.div>

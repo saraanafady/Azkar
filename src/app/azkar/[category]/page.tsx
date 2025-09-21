@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { useSession } from "next-auth/react"
 import { Bookmark, CheckCircle, Circle, Star, ArrowLeft, Quote, ArrowRight, Sparkles, Crown } from "lucide-react"
@@ -64,6 +64,7 @@ const islamicQuotes = [
 
 export default function AzkarCategoryPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const { data: session } = useSession()
   const [azkar, setAzkar] = useState<Azkar[]>([])
   const [category, setCategory] = useState<Category | null>(null)
@@ -77,12 +78,40 @@ export default function AzkarCategoryPage() {
   const [currentAzkarIndex, setCurrentAzkarIndex] = useState(0)
   const [showCelebration, setShowCelebration] = useState(false)
   const [celebrationMessage, setCelebrationMessage] = useState("")
+  const [highlightId, setHighlightId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState<string | null>(null)
 
   useEffect(() => {
     if (params.category) {
       fetchAzkar(params.category as string)
     }
   }, [params.category])
+
+  // Handle URL parameters for search and highlight
+  useEffect(() => {
+    const highlight = searchParams.get('highlight')
+    const search = searchParams.get('search')
+    
+    if (highlight) {
+      setHighlightId(highlight)
+      // Scroll to the highlighted item after a short delay
+      setTimeout(() => {
+        const element = document.getElementById(`azkar-${highlight}`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          // Add highlight effect
+          element.classList.add('ring-2', 'ring-primary', 'ring-opacity-50')
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-primary', 'ring-opacity-50')
+          }, 3000)
+        }
+      }, 500)
+    }
+    
+    if (search) {
+      setSearchQuery(search)
+    }
+  }, [searchParams])
 
   const fetchAzkar = async (categoryName: string) => {
     try {
@@ -267,7 +296,7 @@ export default function AzkarCategoryPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     )
   }
@@ -276,10 +305,10 @@ export default function AzkarCategoryPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             Category not found
           </h1>
-          <Link href="/azkar" className="text-indigo-600 dark:text-indigo-400">
+          <Link href="/azkar" className="text-primary">
             Back to Azkar
           </Link>
         </div>
@@ -288,13 +317,13 @@ export default function AzkarCategoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <Link 
             href="/azkar" 
-            className="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mb-4"
+            className="inline-flex items-center text-primary hover:text-primary/80 mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Azkar
@@ -305,13 +334,13 @@ export default function AzkarCategoryPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
               {category.name}
             </h1>
-            <h2 className="text-2xl font-semibold text-indigo-600 dark:text-indigo-400 mb-4" dir="rtl">
+            <h2 className="text-2xl font-semibold text-primary mb-4" dir="rtl">
               {category.nameAr}
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-muted-foreground">
               {category.description}
             </p>
           </motion.div>
@@ -332,19 +361,21 @@ export default function AzkarCategoryPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-200 cursor-pointer select-none ${
-                  isComplete ? 'ring-2 ring-green-500 ring-opacity-50' : 'hover:shadow-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/10'
+                className={`bg-card rounded-xl shadow-lg p-6 transition-all duration-200 cursor-pointer select-none border border-border ${
+                  isComplete ? 'ring-2 ring-green-500 ring-opacity-50' : 'hover:shadow-xl hover:bg-accent/50'
                 } ${
-                  isAnimating ? 'scale-105 bg-indigo-100 dark:bg-indigo-800/30' : ''
+                  isAnimating ? 'scale-105 bg-accent' : ''
+                } ${
+                  highlightId === item.id ? 'ring-2 ring-primary ring-opacity-50 bg-primary/5' : ''
                 }`}
                 onClick={() => !isComplete && (session ? incrementProgress(item.id) : incrementLocalProgress(item.id))}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    <h3 className="text-xl font-semibold text-foreground mb-2">
                       {item.title}
                     </h3>
-                    <h4 className="text-lg font-medium text-indigo-600 dark:text-indigo-400 mb-3" dir="rtl">
+                    <h4 className="text-lg font-medium text-primary mb-3" dir="rtl">
                       {item.titleAr}
                     </h4>
                   </div>
@@ -355,7 +386,7 @@ export default function AzkarCategoryPage() {
                       className={`p-2 rounded-lg transition-colors ${
                         item.isBookmarked
                           ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400'
-                          : 'bg-gray-100 text-gray-400 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
+                          : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                       }`}
                     >
                       <Bookmark className={`w-5 h-5 ${item.isBookmarked ? 'fill-current' : ''}`} />
@@ -368,12 +399,12 @@ export default function AzkarCategoryPage() {
                   <p className={`text-2xl font-medium text-center leading-relaxed transition-all duration-200 ${
                     isComplete 
                       ? 'text-green-600 dark:text-green-400' 
-                      : 'text-gray-900 dark:text-white'
+                      : 'text-foreground'
                   }`} dir="rtl">
                     {item.arabicText}
                   </p>
                   {!isComplete && (
-                    <p className="text-sm text-gray-500 dark:text-black-400 text-center mt-2">
+                    <p className="text-sm text-muted-foreground text-center mt-2">
                       اضغط في أي مكان على هذه البطاقة للعد
                     </p>
                   )}
@@ -381,7 +412,7 @@ export default function AzkarCategoryPage() {
 
                 {/* Translation */}
                 <div className="mb-4">
-                  <p className="text-gray-600 dark:text-black-300 text-center italic">
+                  <p className="text-muted-foreground text-center italic">
                     {item.translation}
                   </p>
                 </div>
@@ -389,28 +420,28 @@ export default function AzkarCategoryPage() {
                 {/* Reference */}
                 {item.reference && (
                   <div className="mb-4">
-                    <p className="text-sm text-black-500 dark:text-gray-400 text-center">
+                    <p className="text-sm text-muted-foreground text-center">
                       المرجع: {item.reference}
                     </p>
                   </div>
                 )}
 
                 {/* Progress Section */}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4" onClick={(e) => e.stopPropagation()}>
+                <div className="border-t border-border pt-4" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="text-sm font-medium text-foreground">
                       التقدم: {completed} / {item.times}
                     </span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-muted-foreground">
                       {Math.round(percentage)}%
                     </span>
                   </div>
                   
                   {/* Progress Bar */}
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4">
+                  <div className="w-full bg-muted rounded-full h-3 mb-4">
                     <motion.div 
                       className={`h-3 rounded-full transition-all duration-300 ${
-                        isComplete ? 'bg-green-500' : 'bg-indigo-600'
+                        isComplete ? 'bg-green-500' : 'bg-primary'
                       }`}
                       style={{ width: `${Math.min(percentage, 100)}%` }}
                       animate={isAnimating ? { scaleX: [1, 1.05, 1] } : {}}
@@ -433,7 +464,7 @@ export default function AzkarCategoryPage() {
                         className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                           isComplete
                             ? 'bg-green-500 text-white cursor-not-allowed'
-                            : 'bg-indigo-600 hover:bg-indigo-700 text-white hover:scale-105 active:scale-95'
+                            : 'bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 active:scale-95'
                         }`}
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
@@ -448,7 +479,7 @@ export default function AzkarCategoryPage() {
                             resetLocalProgress(item.id)
                           }
                         }}
-                        className="flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors hover:scale-105 active:scale-95"
+                        className="flex items-center px-4 py-2 bg-muted hover:bg-muted/80 text-muted-foreground rounded-lg font-medium transition-colors hover:scale-105 active:scale-95"
                       >
                         <Circle className="w-4 h-4 mr-2" />
                         إعادة تعيين
@@ -465,8 +496,8 @@ export default function AzkarCategoryPage() {
                 </div>
 
                 {!session && (
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4 text-center">
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  <div className="border-t border-border pt-4 text-center">
+                    <p className="text-muted-foreground text-sm">
                       سجل الدخول لتتبع تقدمك وحفظ الأذكار
                     </p>
                   </div>
@@ -478,7 +509,7 @@ export default function AzkarCategoryPage() {
 
         {azkar.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-muted-foreground">
               لم يتم العثور على أذكار في هذه الفئة.
             </p>
           </div>
@@ -526,22 +557,22 @@ export default function AzkarCategoryPage() {
           animate={{ opacity: showQuote ? 1 : 0, y: showQuote ? 0 : 50 }}
           className="fixed inset-0 flex items-center justify-center z-40 pointer-events-none"
         >
-          <div className="bg-white dark:bg-gray-800 border-2 border-indigo-300 dark:border-indigo-600 px-8 py-6 rounded-2xl shadow-2xl text-center max-w-2xl mx-4">
+          <div className="bg-card border-2 border-primary/30 px-8 py-6 rounded-2xl shadow-2xl text-center max-w-2xl mx-4">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: showQuote ? 1 : 0 }}
               transition={{ delay: 0.2 }}
               className="mb-4"
             >
-              <Quote className="w-8 h-8 text-indigo-600 dark:text-indigo-400 mx-auto" />
+              <Quote className="w-8 h-8 text-primary mx-auto" />
             </motion.div>
             <div className="font-arabic text-xl mb-4" dir="rtl">
               {currentQuote.arabic}
             </div>
-            <div className="text-lg text-gray-900 dark:text-white mb-2">
+            <div className="text-lg text-foreground mb-2">
               {currentQuote.text}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-muted-foreground">
               {currentQuote.reference}
             </div>
             {autoProgress && (
@@ -549,7 +580,7 @@ export default function AzkarCategoryPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: showQuote ? 1 : 0 }}
                 transition={{ delay: 1 }}
-                className="mt-4 flex items-center justify-center text-indigo-600 dark:text-indigo-400"
+                className="mt-4 flex items-center justify-center text-primary"
               >
                 <ArrowRight className="w-4 h-4 mr-2" />
                 <span className="text-sm">الانتقال إلى الذكر التالي...</span>
@@ -560,26 +591,26 @@ export default function AzkarCategoryPage() {
 
         {/* Auto-Progression Controls */}
         <div className="fixed bottom-4 right-4 z-30">
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-lg">
+          <div className="bg-card border border-border rounded-lg p-4 shadow-lg">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
-                <ArrowRight className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mr-2" />
-                <span className="text-sm font-medium text-gray-900 dark:text-white">التقدم التلقائي</span>
+                <ArrowRight className="w-5 h-5 text-primary mr-2" />
+                <span className="text-sm font-medium text-foreground">التقدم التلقائي</span>
               </div>
               <button
                 onClick={() => setAutoProgress(!autoProgress)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  autoProgress ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'
+                  autoProgress ? 'bg-primary' : 'bg-muted'
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
                     autoProgress ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
               </button>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               {autoProgress 
                 ? "سيتقدم تلقائياً إلى الذكر التالي بعد الإكمال" 
                 : "تقدم يدوي - ستبقى على الذكر الحالي"
