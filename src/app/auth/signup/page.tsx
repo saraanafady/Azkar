@@ -39,7 +39,7 @@ export default function SignUp() {
         setError(result.error || "حدث خطأ. حاول مرة أخرى")
       } else {
         // Redirect to home page with welcome message after successful registration
-        router.push("/?welcome=true")
+        router.push("/dashboard")
       }
     } catch (error) {
       setError("حدث خطأ. حاول مرة أخرى")

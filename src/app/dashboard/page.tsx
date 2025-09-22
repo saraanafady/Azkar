@@ -2,87 +2,34 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
-import { motion } from "framer-motion"
-import { 
-  BookOpen, 
-  Calculator, 
-  Target, 
-  TrendingUp, 
-  Calendar,
-  Star,
-  CheckCircle,
-  Clock,
-  RefreshCw
-} from "lucide-react"
+import { BookOpen, Calculator, Target, TrendingUp, Clock, CheckCircle, RefreshCw } from "lucide-react"
 import Link from "next/link"
+import { ProgressTracker, UserProgress } from "@/lib/progress-tracker"
 
-interface DashboardStats {
-  totalAzkarCompleted: number
-  totalTasbihCount: number
-  streakDays: number
-  todayAzkarProgress: Array<{
-    categoryName: string
-    completed: number
-    total: number
-    percentage: number
-  }>
-  recentTasbihCounts: Array<{
-    id: string
-    count: number
-    date: string
-  }>
-  bookmarkedAzkar: Array<{
-    id: string
-    title: string
-    titleAr: string
-    categoryName: string
-  }>
-}
-
-export default function DashboardPage() {
+export default function SimpleDashboard() {
   const { user, isLoading } = useAuth()
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [progress, setProgress] = useState<UserProgress | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
-  useEffect(() => {
+  const loadProgress = () => {
     if (user) {
-      fetchDashboardStats()
+      const userProgress = ProgressTracker.getProgress(user.id)
+      setProgress(userProgress)
+      ProgressTracker.updateStreak(user.id)
     }
+  }
+
+  useEffect(() => {
+    loadProgress()
   }, [user])
 
-  const fetchDashboardStats = async (isRefresh = false) => {
-    try {
-      if (isRefresh) {
-        setRefreshing(true)
-      }
-      
-      // For localStorage-based auth, create mock stats
-      const mockStats: DashboardStats = {
-        totalAzkarCompleted: 0,
-        totalTasbihCount: 0,
-        streakDays: 0,
-        todayAzkarProgress: [],
-        recentTasbihCounts: [],
-        bookmarkedAzkar: []
-      }
-      
-      setStats(mockStats)
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error)
-    } finally {
-      setLoading(false)
-      if (isRefresh) {
-        setRefreshing(false)
-      }
-    }
-  }
-
   const handleRefresh = () => {
-    fetchDashboardStats(true)
+    setRefreshing(true)
+    loadProgress()
+    setTimeout(() => setRefreshing(false), 500)
   }
 
-  if (isLoading || loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -100,38 +47,24 @@ export default function DashboardPage() {
           <p className="text-muted-foreground mb-6">
             أنت تشاهد النسخة التجريبية. سجل الدخول للوصول إلى بياناتك الشخصية.
           </p>
-          <div className="space-x-4">
+          <div className="space-x-4 p-5">
+          <span className="w-full p-5">
             <Link
               href="/auth/signin"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors p-5 w-full"
             >
               تسجيل الدخول
             </Link>
+            </span>
+            <span>
             <Link
               href="/auth/signup"
-              className="bg-success hover:bg-success/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-success hover:bg-success/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors p-5"
             >
               إنشاء حساب
             </Link>
+            </span>
           </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!stats) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            خطأ في تحميل لوحة التحكم
-          </h1>
-          <button
-            onClick={() => fetchDashboardStats()}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors"
-          >
-            حاول مرة أخرى
-          </button>
         </div>
       </div>
     )
@@ -144,44 +77,26 @@ export default function DashboardPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-3xl md:text-4xl font-bold text-foreground mb-2"
-              >
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
                 مرحباً بعودتك، {user?.name}!
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-xl text-muted-foreground"
-              >
+              </h1>
+              <p className="text-xl text-muted-foreground">
                 إليك نظرة عامة على تقدمك الروحي
-              </motion.p>
+              </p>
             </div>
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              onClick={() => handleRefresh()}
+            <button
+              onClick={handleRefresh}
               disabled={refreshing}
               className="p-3 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-            </motion.button>
+            </button>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="bg-card rounded-xl shadow-lg p-6"
-          >
+          <div className="bg-card rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="bg-primary/10 p-3 rounded-lg">
                 <BookOpen className="w-6 h-6 text-primary" />
@@ -191,18 +106,13 @@ export default function DashboardPage() {
                   الأذكار المكتملة
                 </p>
                 <p className="text-2xl font-bold text-foreground">
-                  {stats.totalAzkarCompleted}
+                  {progress?.totalAzkarCompleted || 0}
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-card rounded-xl shadow-lg p-6"
-          >
+          <div className="bg-card rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="bg-success/10 p-3 rounded-lg">
                 <Calculator className="w-6 h-6 text-success" />
@@ -212,18 +122,13 @@ export default function DashboardPage() {
                   إجمالي السبحة
                 </p>
                 <p className="text-2xl font-bold text-foreground">
-                  {stats.totalTasbihCount}
+                  {progress?.totalTasbihCount || 0}
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="bg-card rounded-xl shadow-lg p-6"
-          >
+          <div className="bg-card rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="bg-primary/10 p-3 rounded-lg">
                 <Target className="w-6 h-6 text-primary" />
@@ -233,18 +138,13 @@ export default function DashboardPage() {
                   أيام متتالية
                 </p>
                 <p className="text-2xl font-bold text-foreground">
-                  {stats.streakDays}
+                  {progress?.streakDays || 0}
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="bg-card rounded-xl shadow-lg p-6"
-          >
+          <div className="bg-card rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="bg-info/10 p-3 rounded-lg">
                 <TrendingUp className="w-6 h-6 text-info" />
@@ -254,177 +154,87 @@ export default function DashboardPage() {
                   هذا الأسبوع
                 </p>
                 <p className="text-2xl font-bold text-foreground">
-                  {stats.recentTasbihCounts.length}
+                  {progress?.recentTasbihCounts.length || 0}
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Today's Progress */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="bg-card rounded-xl shadow-lg p-6"
-          >
+        {/* Recent Activity */}
+        {progress && (progress.recentTasbihCounts.length > 0 || progress.todayAzkarProgress.length > 0) && (
+          <div className="mb-8 bg-card rounded-xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-foreground mb-6 flex items-center">
-              <Calendar className="w-5 h-5 mr-2 text-primary" />
-              تقدم اليوم
+              <Clock className="w-5 h-5 mr-2 text-primary" />
+              النشاط الأخير
             </h3>
             
-            {stats.todayAzkarProgress.length > 0 ? (
-              <div className="space-y-4">
-                {stats.todayAzkarProgress.map((progress, index) => (
-                  <div key={index} className="border border-border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-foreground">
-                        {progress.categoryName}
-                      </h4>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {progress.completed}/{progress.total}
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-3">
-                      <motion.div
-                        className="bg-primary h-3 rounded-full transition-all duration-500"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(progress.percentage, 100)}%` }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                      ></motion.div>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-sm text-muted-foreground">
-                        {Math.round(progress.percentage)}% مكتمل
-                      </p>
-                      <div className="flex items-center text-sm">
-                        <span className="text-primary font-semibold">
-                          {progress.completed}
-                        </span>
-                        <span className="text-muted-foreground mx-1">/</span>
-                        <span className="text-muted-foreground">
-                          {progress.total}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">
-                  لا تقدم اليوم. ابدأ رحلة الذكر!
-                </p>
-                <Link
-                  href="/azkar"
-                  className="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-                >
-                  ابدأ الأذكار
-                </Link>
-              </div>
-            )}
-          </motion.div>
-
-          {/* Recent Activity */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="bg-card rounded-xl shadow-lg p-6"
-          >
-            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center">
-              <TrendingUp className="w-5 h-5 mr-2 text-green-600 dark:text-green-400" />
-              Recent Activity
-            </h3>
-            
-            {stats.recentTasbihCounts.length > 0 ? (
-              <div className="space-y-3">
-                {stats.recentTasbihCounts.slice(0, 5).map((count) => (
-                  <motion.div
-                    key={count.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="flex items-center justify-between bg-card border border-border rounded-lg p-3 hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-success mr-3" />
-                      <div>
-                        <p className="font-semibold text-foreground">
-                          {count.count} dhikr
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(count.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-success font-bold">
-                      ✓
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Calculator className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">
-                  No recent activity. Start using the tasbih counter!
-                </p>
-                <Link
-                  href="/tasbih"
-                  className="mt-4 inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-                >
-                  Use Tasbih
-                </Link>
-              </div>
-            )}
-          </motion.div>
-        </div>
-
-        {/* Bookmarked Azkar */}
-        {stats.bookmarkedAzkar.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="mt-8 bg-card rounded-xl shadow-lg p-6"
-          >
-            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center">
-              <Star className="w-5 h-5 mr-2 text-primary" />
-              Bookmarked Azkar
-            </h3>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {stats.bookmarkedAzkar.map((azkar) => (
-                <Link
-                  key={azkar.id}
-                  href="/azkar"
-                  className="block bg-muted rounded-lg p-4 hover:bg-accent transition-colors border border-border"
-                >
-                  <h4 className="font-semibold text-foreground mb-1">
-                    {azkar.title}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Recent Tasbih */}
+              {progress.recentTasbihCounts.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
+                    <Calculator className="w-4 h-4 mr-2 text-success" />
+                    آخر استخدام للسبحة
                   </h4>
-                  <p className="text-primary text-sm mb-2" dir="rtl">
-                    {azkar.titleAr}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {azkar.categoryName}
-                  </p>
-                </Link>
-              ))}
+                  <div className="space-y-2">
+                    {progress.recentTasbihCounts.slice(0, 3).map((tasbih) => (
+                      <div key={tasbih.id} className="flex items-center justify-between bg-muted rounded-lg p-3">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-4 h-4 text-success mr-2" />
+                          <div>
+                            <p className="font-medium text-foreground" dir="rtl">
+                              {tasbih.textAr || tasbih.category || 'ذكر عام'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(tasbih.date).toLocaleDateString('ar-SA')}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-success font-bold">
+                          {tasbih.count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Today's Azkar Progress */}
+              {progress.todayAzkarProgress.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
+                    <BookOpen className="w-4 h-4 mr-2 text-primary" />
+                    تقدم اليوم في الأذكار
+                  </h4>
+                  <div className="space-y-2">
+                    {progress.todayAzkarProgress.slice(0, 3).map((azkar, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted rounded-lg p-3">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-4 h-4 text-primary mr-2" />
+                          <div>
+                            <p className="font-medium text-foreground">
+                              {azkar.categoryName}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {azkar.completed}/{azkar.total} مكتمل
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-primary font-bold">
+                          {Math.round(azkar.percentage)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-8 grid md:grid-cols-3 gap-6"
-        >
+        <div className="grid md:grid-cols-3 gap-6">
           <Link
             href="/azkar"
             className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
@@ -451,7 +261,7 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold mb-2">Set Goals</h3>
             <p className="text-sm opacity-90">Track your daily dhikr goals</p>
           </Link>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

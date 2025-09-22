@@ -29,13 +29,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Convert NextAuth session to our user format
   useEffect(() => {
     if (session?.user) {
-      setUser({
+      const userData = {
         id: session.user.id || session.user.email || '',
         name: session.user.name || '',
         email: session.user.email || '',
         image: session.user.image || undefined,
         createdAt: new Date().toISOString()
-      })
+      }
+      setUser(userData)
     } else {
       setUser(null)
     }
@@ -48,11 +49,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const savedUser = localStorage.getItem('azkar-user')
       if (savedUser) {
         try {
-          setUser(JSON.parse(savedUser))
+          const parsedUser = JSON.parse(savedUser)
+          setUser(parsedUser)
+          setIsLoading(false)
         } catch (error) {
           console.error('Error parsing saved user:', error)
           localStorage.removeItem('azkar-user')
+          setIsLoading(false)
         }
+      } else {
+        setIsLoading(false)
       }
     }
   }, [status])

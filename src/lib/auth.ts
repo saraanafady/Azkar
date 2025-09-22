@@ -5,8 +5,8 @@ import bcrypt from "bcryptjs"
 import { prisma } from "./prisma"
 
 export const authOptions: NextAuthOptions = {
-  // Use adapter only if database is available
-  adapter: process.env.DATABASE_URL ? PrismaAdapter(prisma) as any : undefined,
+  // Use adapter only if database is available and properly configured
+  adapter: process.env.DATABASE_URL && process.env.NODE_ENV === 'production' ? PrismaAdapter(prisma) as any : undefined,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -20,6 +20,26 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          // For demo mode, use localStorage fallback
+          if (process.env.NODE_ENV === 'development' || !process.env.DATABASE_URL) {
+            // Check localStorage for demo users
+            const storedUsers = typeof window !== 'undefined' ? localStorage.getItem('demo-users') : null
+            if (storedUsers) {
+              const users = JSON.parse(storedUsers)
+              const user = users.find((u: any) => u.email === credentials.email)
+              if (user && user.password === credentials.password) {
+                return {
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  image: user.image,
+                }
+              }
+            }
+            return null
+          }
+
+          // Production database authentication
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email
@@ -46,7 +66,7 @@ export const authOptions: NextAuthOptions = {
             image: user.image,
           }
         } catch (error) {
-          console.error('Database error during authentication:', error)
+          console.error('Authentication error:', error)
           return null
         }
       }
@@ -91,25 +111,20 @@ export const authOptions: NextAuthOptions = {
       }
     }
   },
-  debug: process.env.NODE_ENV === 'development',
-  secret: process.env.NEXTAUTH_SECRET,
-  // Add error handling
+  debug: false, // Disable debug to reduce console logs
+  secret: process.env.NEXTAUTH_SECRET || 'demo-secret-for-development',
+  // Simplified error handling
   events: {
     async signIn({ user, account, profile, isNewUser }) {
-      console.log('Sign in event:', { user, account, profile, isNewUser })
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Sign in successful:', { email: user.email, provider: account?.provider })
+      }
     },
-    async signOut({ token, session }) {
-      console.log('Sign out event:', { token, session })
+    async signOut() {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Sign out successful')
+      }
     },
-    async createUser({ user }) {
-      console.log('Create user event:', { user })
-    },
-    async linkAccount({ user, account, profile }) {
-      console.log('Link account event:', { user, account, profile })
-    },
-    async session({ session, token }) {
-      console.log('Session event:', { session, token })
-    }
   },
   // Add error pages
   pages: {

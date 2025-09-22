@@ -35,9 +35,7 @@ export default function Navigation() {
 
   // Debug theme value and set isDark state
   useEffect(() => {
-    console.log('Current theme:', theme)
-    console.log('Theme type:', typeof theme)
-    console.log('Is dark?', theme === 'dark')
+    // Theme debugging removed for production
     setIsDark(theme === 'dark')
   }, [theme])
 

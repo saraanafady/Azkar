@@ -33,11 +33,7 @@ export default function Navigation() {
   }, [isOpen])
 
   // Debug theme value
-  useEffect(() => {
-    console.log('Current theme:', theme)
-    console.log('Theme type:', typeof theme)
-    console.log('Is dark?', theme === 'dark')
-  }, [theme])
+  // Theme debugging removed for production
 
   const navigation = [
     { name: "الرئيسية", href: "/", icon: Home },

@@ -73,26 +73,53 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-radial from-amber-50/80 via-white to-blue-50/60 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/40">
           {/* Animated Glowing Particles */}
           <div className="absolute inset-0 overflow-hidden">
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-2 h-2 bg-amber-400/30 dark:bg-amber-400/40 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, -20, 0],
-                  opacity: [0.3, 0.8, 0.3],
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  duration: 3 + Math.random() * 2,
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                }}
-              />
-            ))}
+            {[...Array(20)].map((_, i) => {
+              // Use deterministic positioning based on index to avoid hydration mismatch
+              const positions = [
+                { left: 18.2, top: 36.2 },
+                { left: 42.7, top: 37.7 },
+                { left: 65.1, top: 27.3 },
+                { left: 19.6, top: 51.3 },
+                { left: 88.5, top: 42.7 },
+                { left: 66.6, top: 87.1 },
+                { left: 55.4, top: 26.0 },
+                { left: 57.3, top: 5.6 },
+                { left: 44.9, top: 69.3 },
+                { left: 55.5, top: 29.6 },
+                { left: 42.2, top: 39.2 },
+                { left: 23.2, top: 60.8 },
+                { left: 2.1, top: 61.1 },
+                { left: 33.2, top: 26.4 },
+                { left: 10.5, top: 31.3 },
+                { left: 98.5, top: 29.5 },
+                { left: 34.2, top: 29.0 },
+                { left: 87.7, top: 35.2 },
+                { left: 66.3, top: 90.9 },
+                { left: 59.8, top: 59.9 }
+              ]
+              const pos = positions[i] || { left: 50, top: 50 }
+              
+              return (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 bg-amber-400/30 dark:bg-amber-400/40 rounded-full"
+                  style={{
+                    left: `${pos.left}%`,
+                    top: `${pos.top}%`,
+                  }}
+                  animate={{
+                    y: [0, -20, 0],
+                    opacity: [0.3, 0.8, 0.3],
+                    scale: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    duration: 3 + (i % 3) * 0.5,
+                    repeat: Infinity,
+                    delay: (i % 5) * 0.4,
+                  }}
+                />
+              )
+            })}
           </div>
           
           {/* Soft Light Rays */}
@@ -146,11 +173,11 @@ export default function Home() {
               className="flex justify-center items-center mb-12"
             >
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-0.5 bg-gradient-to-r from-transparent to-amber-400"></div>
-                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                <div className="w-24 h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400"></div>
-                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                <div className="w-16 h-0.5 bg-gradient-to-r from-amber-400 to-transparent"></div>
+                <div className="w-16 h-0.5 bg-gradient-to-r from-transparent to-amber-400 dark:to-amber-500"></div>
+                <div className="w-3 h-3 bg-amber-500 dark:bg-amber-400 rounded-full"></div>
+                <div className="w-24 h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 dark:from-amber-500 dark:via-amber-400 dark:to-amber-500"></div>
+                <div className="w-3 h-3 bg-amber-500 dark:bg-amber-400 rounded-full"></div>
+                <div className="w-16 h-0.5 bg-gradient-to-r from-amber-400 to-transparent dark:from-amber-500"></div>
               </div>
             </motion.div>
           </motion.div>
@@ -201,7 +228,7 @@ export default function Home() {
               >
                 <div className="relative">
                   {/* Glowing Border Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 via-amber-500/30 to-amber-400/20 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 via-amber-500/30 to-amber-400/20 dark:from-amber-400/30 dark:via-amber-500/40 dark:to-amber-400/30 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   
                   {/* Main Card */}
                   <div className="relative bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-amber-200/50 dark:border-amber-700/50 group-hover:border-amber-400/70 dark:group-hover:border-amber-500/70">
@@ -214,9 +241,9 @@ export default function Home() {
                       
                       {/* Islamic Decorative Pattern */}
                       <div className="flex justify-center items-center space-x-2">
-                        <div className="w-1 h-1 bg-amber-400 rounded-full group-hover:bg-amber-500 transition-colors"></div>
-                        <div className="w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full group-hover:from-amber-500 group-hover:to-amber-600 transition-all"></div>
-                        <div className="w-1 h-1 bg-amber-400 rounded-full group-hover:bg-amber-500 transition-colors"></div>
+                        <div className="w-1 h-1 bg-amber-400 dark:bg-amber-500 rounded-full group-hover:bg-amber-500 dark:group-hover:bg-amber-400 transition-colors"></div>
+                        <div className="w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 dark:from-amber-500 dark:to-amber-400 rounded-full group-hover:from-amber-500 group-hover:to-amber-600 dark:group-hover:from-amber-400 dark:group-hover:to-amber-300 transition-all"></div>
+                        <div className="w-1 h-1 bg-amber-400 dark:bg-amber-500 rounded-full group-hover:bg-amber-500 dark:group-hover:bg-amber-400 transition-colors"></div>
                       </div>
                     </div>
                   </div>
@@ -262,19 +289,19 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 2, delay: 8 }}
-            className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 w-40 h-40 border-2 border-amber-300/20 rounded-full"
+            className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 w-40 h-40 border-2 border-amber-300/20 dark:border-amber-400/30 rounded-full"
           />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 2, delay: 8.5 }}
-            className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-24 h-24 border border-amber-400/30 rounded-full"
+            className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-24 h-24 border border-amber-400/30 dark:border-amber-500/40 rounded-full"
           />
         </div>
       </section>
 
       {/* Azkar Section */}
-      <section className="py-20 bg-card">
+      <section className="py-20 bg-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -295,7 +322,7 @@ export default function Home() {
             >
               <Link
                 href="/azkar/morning"
-                className="block bg-card rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-border hover:border-primary/50"
+                className="block bg-card rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-border hover:border-primary/50 group"
               >
                 <div className="flex items-center justify-center mb-6">
                   <div className="bg-primary/10 p-4 rounded-full group-hover:bg-primary/20 transition-colors">
@@ -326,7 +353,7 @@ export default function Home() {
             >
               <Link
                 href="/azkar/evening"
-                className="block bg-card rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-border hover:border-primary/50"
+                className="block bg-card rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-border hover:border-primary/50 group"
               >
                 <div className="flex items-center justify-center mb-6">
                   <div className="bg-primary/10 p-4 rounded-full group-hover:bg-primary/20 transition-colors">
@@ -352,7 +379,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -399,7 +426,7 @@ export default function Home() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 bg-card">
+      <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -455,7 +482,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-card py-12">
+      <footer className="bg-card py-12 border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h3 className="text-2xl font-bold text-foreground mb-4">Azkar</h3>

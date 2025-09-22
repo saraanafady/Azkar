@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { useAuth } from "@/contexts/AuthContext"
 import { Bookmark, CheckCircle, Circle, Star, ArrowLeft, Quote, ArrowRight, Sparkles, Crown } from "lucide-react"
 import Link from "next/link"
+import { ProgressTracker } from "@/lib/progress-tracker"
 
 interface Azkar {
   id: string
@@ -243,6 +244,11 @@ export default function AzkarCategoryPage() {
   }
 
   const handleCompletion = async (azkarId: string, azkarItem: Azkar) => {
+    // Track progress for authenticated users
+    if (user) {
+      ProgressTracker.updateAzkarProgress(user.id, category?.name || 'Unknown', 1, 1)
+    }
+    
     // Show beautiful quote
     showBeautifulQuote()
     

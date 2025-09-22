@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { RotateCcw, Save, History, Target, Trophy, Star, Zap, Heart, Crown, Sparkles, Quote, ArrowRight } from "lucide-react"
+import { ProgressTracker } from "@/lib/progress-tracker"
 
 interface TasbihOption {
   id: string
@@ -306,6 +307,11 @@ function TasbihContent() {
     setCount(newCount)
     setIsAnimating(true)
     setTimeout(() => setIsAnimating(false), 200)
+
+    // Track progress for authenticated users
+    if (user) {
+      ProgressTracker.updateTasbihProgress(user.id, 1, 'Tasbih', selectedTasbih?.textAr)
+    }
 
     // Check for completion
     if (newCount >= target) {

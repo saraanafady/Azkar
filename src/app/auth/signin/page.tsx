@@ -24,8 +24,8 @@ export default function SignIn() {
       if (!result.success) {
         setError(result.error || "Invalid email or password")
       } else {
-        // Redirect to home page with welcome back message after successful login
-        router.push("/?login=true")
+        // Redirect to home page after successful login
+        router.push("/")
       }
     } catch (error) {
       setError("Something went wrong. Please try again.")

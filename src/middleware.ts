@@ -12,16 +12,13 @@ export default withAuth(
             req.nextUrl.pathname === '/' ||
             req.nextUrl.pathname.startsWith('/azkar') ||
             req.nextUrl.pathname.startsWith('/tasbih') ||
-            req.nextUrl.pathname.startsWith('/auth')) {
+            req.nextUrl.pathname.startsWith('/auth') ||
+            req.nextUrl.pathname.startsWith('/dashboard')) {
           return true
         }
         
-        // Require authentication for protected routes
-        if (req.nextUrl.pathname.startsWith('/dashboard')) {
-          return !!token
-        }
-        
-        return true
+        // Require authentication for other protected routes
+        return !!token
       },
     },
   }
