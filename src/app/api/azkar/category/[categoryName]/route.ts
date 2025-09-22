@@ -9,8 +9,8 @@ export async function GET(
     const { categoryName } = await params
 
     // Find the category in the data structure
-    let category = null
-    let azkar = []
+    let category: any = null
+    let azkar: any[] = []
 
     // Check each category type
     for (const [key, data] of Object.entries(completeAzkarData)) {

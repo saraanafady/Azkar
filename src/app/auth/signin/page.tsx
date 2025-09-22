@@ -92,7 +92,7 @@ export default function SignIn() {
             </div>
           </div>
 
-          <div>
+          <div className="space-y-4">
             <button
               type="submit"
               disabled={isLoading}
@@ -100,6 +100,8 @@ export default function SignIn() {
             >
               {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
             </button>
+            
+
           </div>
         </form>
       </div>

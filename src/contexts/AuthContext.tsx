@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useSession, signOut } from 'next-auth/react'
 
 interface User {
   id: string
@@ -21,12 +22,29 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { data: session, status } = useSession()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load user from localStorage on mount
+  // Convert NextAuth session to our user format
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (session?.user) {
+      setUser({
+        id: session.user.id || session.user.email || '',
+        name: session.user.name || '',
+        email: session.user.email || '',
+        image: session.user.image || undefined,
+        createdAt: new Date().toISOString()
+      })
+    } else {
+      setUser(null)
+    }
+    setIsLoading(status === 'loading')
+  }, [session, status])
+
+  // Fallback to localStorage for non-NextAuth users
+  useEffect(() => {
+    if (status === 'unauthenticated' && typeof window !== 'undefined') {
       const savedUser = localStorage.getItem('azkar-user')
       if (savedUser) {
         try {
@@ -37,19 +55,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     }
-    setIsLoading(false)
-  }, [])
+  }, [status])
 
-  // Save user to localStorage whenever user changes
+  // Save user to localStorage whenever user changes (for non-NextAuth users)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (user) {
-        localStorage.setItem('azkar-user', JSON.stringify(user))
-      } else {
-        localStorage.removeItem('azkar-user')
-      }
+    if (typeof window !== 'undefined' && user && !session?.user) {
+      localStorage.setItem('azkar-user', JSON.stringify(user))
+    } else if (typeof window !== 'undefined' && !user) {
+      localStorage.removeItem('azkar-user')
     }
-  }, [user])
+  }, [user, session])
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
@@ -57,8 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: 'Not available on server' }
       }
 
-      // For now, use localStorage for login (since we don't have a login API endpoint)
-      // In a real app, you'd call a login API endpoint
+      // Use localStorage for login (simpler and more reliable for demo)
       const users = JSON.parse(localStorage.getItem('azkar-users') || '[]')
       
       // Find user by email
@@ -68,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: 'User not found' }
       }
 
-      // Simple password check (in real app, you'd hash passwords)
+      // For localStorage users, we store plain passwords (not hashed)
+      // This is for demo purposes only
       if (foundUser.password !== password) {
         return { success: false, error: 'Invalid password' }
       }
@@ -90,39 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: 'Not available on server' }
       }
 
-      // Call the API endpoint for registration
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      })
-
-      // Check if response is JSON
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
-        console.error('API returned non-JSON response:', response.status, response.statusText)
-        // Fallback to localStorage registration
-        return await registerWithLocalStorage(name, email, password)
-      }
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        return { success: false, error: data.message || 'Registration failed' }
-      }
-
-      // Set user from API response
-      if (data.user) {
-        setUser(data.user)
-      }
-      
-      return { success: true }
+      // Always use localStorage for registration to ensure consistency with login
+      return await registerWithLocalStorage(name, email, password)
     } catch (error) {
       console.error('Registration error:', error)
-      // Fallback to localStorage registration
-      return await registerWithLocalStorage(name, email, password)
+      return { success: false, error: 'Registration failed' }
     }
   }
 
@@ -161,8 +148,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const logout = () => {
-    setUser(null)
+  const logout = async () => {
+    if (session?.user) {
+      // NextAuth user - use NextAuth signOut
+      await signOut({ callbackUrl: '/' })
+    } else {
+      // Local user - just clear local state
+      setUser(null)
+    }
   }
 
   return (

@@ -14,8 +14,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Collect all azkar from all categories
-    const allAzkar = []
-    const allCategories = []
+    const allAzkar: any[] = []
+    const allCategories: any[] = []
     
     for (const [key, data] of Object.entries(completeAzkarData)) {
       allAzkar.push(...data.azkar)

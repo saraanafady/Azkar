@@ -138,7 +138,7 @@ export default function SignUp() {
             </div>
           </div>
 
-          <div>
+          <div className="space-y-4">
             <button
               type="submit"
               disabled={isLoading}
@@ -146,6 +146,8 @@ export default function SignUp() {
             >
               {isLoading ? "جاري إنشاء الحساب..." : "إنشاء الحساب"}
             </button>
+            
+
           </div>
         </form>
       </div>

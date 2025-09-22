@@ -5,10 +5,10 @@ import { useNotification } from "@/hooks/use-notification"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { BookOpen, Calculator, BarChart3, Heart, Star, Moon, Sun, ArrowRight } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
-export default function Home() {
+function WelcomeMessages() {
   const { user } = useAuth()
   const { success } = useNotification()
   const searchParams = useSearchParams()
@@ -24,6 +24,12 @@ export default function Home() {
       success(`مرحباً بعودتك ${user.name}! استمر في رحلتك الروحية.`)
     }
   }, [searchParams, user, success])
+
+  return null
+}
+
+export default function Home() {
+  const { user } = useAuth()
 
   const features = [
     {
@@ -57,6 +63,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      <Suspense fallback={null}>
+        <WelcomeMessages />
+      </Suspense>
+      
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image with Overlay */}
