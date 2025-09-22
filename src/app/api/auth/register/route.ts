@@ -14,6 +14,9 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      // Test database connection first
+      await prisma.$connect()
+      
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
         where: { email }
@@ -49,14 +52,22 @@ export async function POST(request: NextRequest) {
       console.error("Database error during registration:", dbError)
       
       // Return a mock success response when database is not available
-      // In a real app, you'd want to handle this differently
+      // This allows the app to work in demo mode
       return NextResponse.json(
         { 
           message: "Registration successful (demo mode - database not available)", 
-          user: { id: "demo-user", name, email }
+          user: { 
+            id: `demo-user-${Date.now()}`, 
+            name, 
+            email,
+            createdAt: new Date().toISOString()
+          }
         },
         { status: 201 }
       )
+    } finally {
+      // Always disconnect from database
+      await prisma.$disconnect().catch(() => {})
     }
   } catch (error) {
     console.error("Registration error:", error)

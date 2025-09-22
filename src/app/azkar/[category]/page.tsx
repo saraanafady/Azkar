@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/contexts/AuthContext"
 import { Bookmark, CheckCircle, Circle, Star, ArrowLeft, Quote, ArrowRight, Sparkles, Crown } from "lucide-react"
 import Link from "next/link"
 
@@ -65,7 +65,7 @@ const islamicQuotes = [
 export default function AzkarCategoryPage() {
   const params = useParams()
   const searchParams = useSearchParams()
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const [azkar, setAzkar] = useState<Azkar[]>([])
   const [category, setCategory] = useState<Category | null>(null)
   const [loading, setLoading] = useState(true)
@@ -199,7 +199,7 @@ export default function AzkarCategoryPage() {
   }
 
   const getCurrentProgress = (azkarId: string) => {
-    if (session) {
+    if (user) {
       return progress[azkarId] || 0
     }
     return localProgress[azkarId] || 0
@@ -368,7 +368,7 @@ export default function AzkarCategoryPage() {
                 } ${
                   highlightId === item.id ? 'ring-2 ring-primary ring-opacity-50 bg-primary/5' : ''
                 }`}
-                onClick={() => !isComplete && (session ? incrementProgress(item.id) : incrementLocalProgress(item.id))}
+                onClick={() => !isComplete && (user ? incrementProgress(item.id) : incrementLocalProgress(item.id))}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -380,7 +380,7 @@ export default function AzkarCategoryPage() {
                     </h4>
                   </div>
                   
-                  {session && (
+                  {user && (
                     <button
                       onClick={() => toggleBookmark(item.id)}
                       className={`p-2 rounded-lg transition-colors ${
@@ -454,7 +454,7 @@ export default function AzkarCategoryPage() {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => {
-                          if (session) {
+                          if (user) {
                             incrementProgress(item.id)
                           } else {
                             incrementLocalProgress(item.id)
@@ -473,7 +473,7 @@ export default function AzkarCategoryPage() {
                       
                       <button
                         onClick={() => {
-                          if (session) {
+                          if (user) {
                             resetProgress(item.id)
                           } else {
                             resetLocalProgress(item.id)
@@ -495,7 +495,7 @@ export default function AzkarCategoryPage() {
                   </div>
                 </div>
 
-                {!session && (
+                {!user && (
                   <div className="border-t border-border pt-4 text-center">
                     <p className="text-muted-foreground text-sm">
                       سجل الدخول لتتبع تقدمك وحفظ الأذكار

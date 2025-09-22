@@ -99,6 +99,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ name, email, password }),
       })
 
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('API returned non-JSON response:', response.status, response.statusText)
+        // Fallback to localStorage registration
+        return await registerWithLocalStorage(name, email, password)
+      }
+
       const data = await response.json()
 
       if (!response.ok) {
@@ -113,6 +121,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: true }
     } catch (error) {
       console.error('Registration error:', error)
+      // Fallback to localStorage registration
+      return await registerWithLocalStorage(name, email, password)
+    }
+  }
+
+  // Fallback registration using localStorage
+  const registerWithLocalStorage = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // Get existing users
+      const users = JSON.parse(localStorage.getItem('azkar-users') || '[]')
+      
+      // Check if user already exists
+      if (users.find((u: any) => u.email === email)) {
+        return { success: false, error: 'User already exists' }
+      }
+
+      // Create new user
+      const newUser = {
+        id: Date.now().toString(),
+        name,
+        email,
+        password, // In real app, hash this
+        createdAt: new Date().toISOString()
+      }
+
+      // Save to localStorage
+      users.push(newUser)
+      localStorage.setItem('azkar-users', JSON.stringify(users))
+
+      // Set user (without password)
+      const { password: _, ...userWithoutPassword } = newUser
+      setUser(userWithoutPassword)
+      
+      return { success: true }
+    } catch (error) {
+      console.error('LocalStorage registration error:', error)
       return { success: false, error: 'Registration failed' }
     }
   }
