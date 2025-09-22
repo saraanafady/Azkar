@@ -67,81 +67,175 @@ export default function Home() {
         <WelcomeMessages />
       </Suspense>
       
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: "url('/images/mousq.jpg')",
-          }}
-        />
-        <div className="absolute inset-0 bg-background/60" />
+      {/* Hero Section - 99 Beautiful Names of Allah */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden p-5">
+        {/* Premium Islamic Background */}
+        <div className="absolute inset-0 bg-gradient-radial from-amber-50/80 via-white to-blue-50/60 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/40">
+          {/* Animated Glowing Particles */}
+          <div className="absolute inset-0 overflow-hidden">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-2 h-2 bg-amber-400/30 dark:bg-amber-400/40 rounded-full"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  y: [0, -20, 0],
+                  opacity: [0.3, 0.8, 0.3],
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{
+                  duration: 3 + Math.random() * 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                }}
+              />
+            ))}
+          </div>
+          
+          {/* Soft Light Rays */}
+          <div className="absolute inset-0 opacity-30">
+            <div className="absolute top-1/4 left-1/4 w-px h-2/3 bg-gradient-to-b from-transparent via-amber-300/40 dark:via-amber-400/50 to-transparent animate-pulse"></div>
+            <div className="absolute top-1/3 right-1/3 w-px h-1/2 bg-gradient-to-b from-transparent via-amber-400/30 dark:via-amber-500/40 to-transparent animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+            <div className="absolute top-1/2 left-1/2 w-px h-1/3 bg-gradient-to-b from-transparent via-amber-300/50 dark:via-amber-400/60 to-transparent animate-pulse" style={{ animationDelay: '3s' }}></div>
+          </div>
+          
+          {/* Islamic Geometric Patterns */}
+          <div className="absolute top-20 left-10 w-20 h-20 border border-amber-300/20 dark:border-amber-400/30 rounded-full animate-spin" style={{ animationDuration: '20s' }}></div>
+          <div className="absolute top-40 right-20 w-16 h-16 border border-amber-400/25 dark:border-amber-500/35 rounded-full animate-spin" style={{ animationDuration: '15s', animationDirection: 'reverse' }}></div>
+          <div className="absolute bottom-40 left-20 w-24 h-24 border border-amber-300/15 dark:border-amber-400/25 rounded-full animate-spin" style={{ animationDuration: '25s' }}></div>
+          <div className="absolute bottom-20 right-10 w-12 h-12 border border-amber-400/30 dark:border-amber-500/40 rounded-full animate-spin" style={{ animationDuration: '18s', animationDirection: 'reverse' }}></div>
+        </div>
         
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Arabic Calligraphy - Bismillah */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Main Title with Gradient Text */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="mb-8 text-center ph-5"
+            transition={{ duration: 1.2 }}
+            className="mb-8"
           >
-            <div className="text-2xl md:text-3xl text-foreground font-arabic leading-relaxed text-center">
-             <h1 >بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</h1> 
-             <h1 className="p-3">قُلْ هُوَ ٱللَّهُ أَحَدٌ، ٱللَّهُ ٱلصَّمَدُ، لَمْ يَلِدْ وَلَمْ يُولَدْ، وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ.</h1>
-            </div>
-            <div className="text-xs md:text-sm text-muted-foreground mt-2 font-light text-center">
-           
-            </div>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-700 dark:from-amber-400 dark:via-amber-300 dark:to-amber-500 bg-clip-text text-transparent"
+                style={{ 
+                  fontFamily: 'Amiri, serif', 
+                  textShadow: '0 4px 8px rgba(245, 158, 11, 0.3)',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                }}>
+              أسماء الله الحسنى
+            </h1>
+            
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8"
+              style={{ fontFamily: 'Amiri, serif' }}
+            >
+              من أحصاها دخل الجنة
+            </motion.p>
+            
+            {/* Decorative Islamic Separator */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 1.5, delay: 1 }}
+              className="flex justify-center items-center mb-12"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-0.5 bg-gradient-to-r from-transparent to-amber-400"></div>
+                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                <div className="w-24 h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400"></div>
+                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                <div className="w-16 h-0.5 bg-gradient-to-r from-amber-400 to-transparent"></div>
+              </div>
+            </motion.div>
           </motion.div>
 
-          {/* Main Heading */}
+          {/* Flowing Animated Names Grid */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="mb-8 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5, delay: 1.5 }}
+            className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-4 md:gap-6 lg:gap-8 w-full"
           >
-            <div className="text-2xl md:text-3xl text-foreground font-arabic leading-relaxed text-center">
-             <h1 >بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</h1> 
-             <h1 className="p-3">
-             قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ، مِن شَرِّ مَا خَلَقَ، وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ، وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ، وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ.
-             </h1>
-            </div>
-            <div className="text-xs md:text-sm text-muted-foreground mt-2 font-light text-center">
-           
-            </div>
+            {[
+              "الرَّحْمَنُ", "الرَّحِيمُ", "الْمَلِكُ", "الْقُدُّوسُ", "السَّلَامُ", "الْمُؤْمِنُ",
+              "الْمُهَيْمِنُ", "الْعَزِيزُ", "الْجَبَّارُ", "الْمُتَكَبِّرُ", "الْخَالِقُ", "الْبَارِئُ",
+              "الْمُصَوِّرُ", "الْغَفَّارُ", "الْقَهَّارُ", "الْوَهَّابُ", "الرَّزَّاقُ", "الْفَتَّاحُ",
+              "الْعَلِيمُ", "الْقَابِضُ", "الْبَاسِطُ", "الْخَافِضُ", "الرَّافِعُ", "الْمُعِزُّ",
+              "الْمُذِلُّ", "السَّمِيعُ", "الْبَصِيرُ", "الْحَكَمُ", "الْعَدْلُ", "اللَّطِيفُ",
+              "الْخَبِيرُ", "الْحَلِيمُ", "الْعَظِيمُ", "الْغَفُورُ", "الشَّكُورُ", "الْعَلِيُّ",
+              "الْكَبِيرُ", "الْحَفِيظُ", "الْمُقِيتُ", "الْحَسِيبُ", "الْجَلِيلُ", "الْكَرِيمُ",
+              "الرَّقِيبُ", "الْمُجِيبُ", "الْوَاسِعُ", "الْحَكِيمُ", "الْوَدُودُ", "الْمَجِيدُ",
+              "الْبَاعِثُ", "الشَّهِيدُ", "الْحَقُّ", "الْوَكِيلُ", "الْقَوِيُّ", "الْمَتِينُ",
+              "الْوَلِيُّ", "الْحَمِيدُ", "الْمُحْصِي", "الْمُبْدِئُ", "الْمُعِيدُ", "الْمُحْيِي",
+              "الْمُمِيتُ", "الْحَيُّ", "الْقَيُّومُ", "الْوَاجِدُ", "الْمَاجِدُ", "الْوَاحِدُ",
+              "الصَّمَدُ", "الْقَادِرُ", "الْمُقْتَدِرُ", "الْمُقَدِّمُ", "الْمُؤَخِّرُ", "الْأَوَّلُ",
+              "الْآخِرُ", "الظَّاهِرُ", "الْبَاطِنُ", "الْوَالِي", "الْمُتَعَالِي", "الْبَرُّ",
+              "التَّوَّابُ", "الْمُنْتَقِمُ", "الْعَفُوُّ", "الرَّءُوفُ", "مَالِكُ الْمُلْكِ", "ذُو الْجَلَالِ",
+              "وَالْإِكْرَامِ", "الْمُقْسِطُ", "الْجَامِعُ", "الْغَنِيُّ", "الْمُغْنِي", "الْمَانِعُ",
+              "الضَّارُّ", "النَّافِعُ", "النُّورُ", "الْهَادِي", "الْبَدِيعُ", "الْبَاقِي",
+              "الْوَارِثُ", "الرَّشِيدُ", "الصَّبُورُ"
+            ].map((name, index) => (
+              <motion.div
+                key={name}
+                initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: 2 + (index * 0.05),
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 15
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  y: -5,
+                  transition: { duration: 0.2 }
+                }}
+                className="group cursor-pointer"
+              >
+                <div className="relative">
+                  {/* Glowing Border Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 via-amber-500/30 to-amber-400/20 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  {/* Main Card */}
+                  <div className="relative bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-amber-200/50 dark:border-amber-700/50 group-hover:border-amber-400/70 dark:group-hover:border-amber-500/70">
+                    <div className="text-center">
+                      {/* Name with Premium Typography */}
+                      <div className="text-base md:text-lg lg:text-xl font-bold text-slate-800 dark:text-slate-100 mb-3 group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors duration-300"
+                           style={{ fontFamily: 'Amiri, serif' }}>
+                        {name}
+                      </div>
+                      
+                      {/* Islamic Decorative Pattern */}
+                      <div className="flex justify-center items-center space-x-2">
+                        <div className="w-1 h-1 bg-amber-400 rounded-full group-hover:bg-amber-500 transition-colors"></div>
+                        <div className="w-6 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full group-hover:from-amber-500 group-hover:to-amber-600 transition-all"></div>
+                        <div className="w-1 h-1 bg-amber-400 rounded-full group-hover:bg-amber-500 transition-colors"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
 
-          {/* Subtitle */}
-     
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="mb-8 text-center"
-          >
-            <div className="text-2xl md:text-3xl text-foreground font-arabic leading-relaxed text-center">
-             <h1 >بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</h1> 
-             <h1 className="p-3">
-             قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ، مَلِكِ ٱلنَّاسِ، إِلَٰهِ ٱلنَّاسِ، مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ، ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ، مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ.             </h1>
-            </div>
-            <div className="text-xs md:text-sm text-muted-foreground mt-2 font-light text-center">
-           
-            </div>
-          </motion.div>
           {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+            transition={{ duration: 0.8, delay: 7 }}
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-16"
           >
             {user ? (
               <Link
                 href="/dashboard"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl"
+                className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:via-amber-700 hover:to-amber-800 text-white px-12 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-amber-500/25 border border-amber-400/20"
               >
                 تتبع تقدمك اليومي
               </Link>
@@ -149,13 +243,13 @@ export default function Home() {
               <>
                 <Link
                   href="/auth/signup"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl"
+                  className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:via-amber-700 hover:to-amber-800 text-white px-12 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-amber-500/25 border border-amber-400/20"
                 >
                   إنشاء حساب
                 </Link>
                 <Link
                   href="/auth/signin"
-                  className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-10 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105"
+                  className="border-2 border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-gradient-to-r hover:from-amber-500 hover:to-amber-600 hover:text-white px-12 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 backdrop-blur-sm bg-white/50 dark:bg-slate-800/50"
                 >
                   تسجيل الدخول
                 </Link>
@@ -163,18 +257,18 @@ export default function Home() {
             )}
           </motion.div>
 
-          {/* Decorative Elements */}
+          {/* Decorative Bottom Elements */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 2, delay: 1.2 }}
-            className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 w-32 h-32 border-2 border-primary/30 rounded-full"
+            transition={{ duration: 2, delay: 8 }}
+            className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 w-40 h-40 border-2 border-amber-300/20 rounded-full"
           />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 2, delay: 1.4 }}
-            className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-20 h-20 border border-primary/50 rounded-full"
+            transition={{ duration: 2, delay: 8.5 }}
+            className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-24 h-24 border border-amber-400/30 rounded-full"
           />
         </div>
       </section>
