@@ -1,12 +1,29 @@
 "use client"
 
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/contexts/AuthContext"
+import { useNotification } from "@/hooks/use-notification"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { BookOpen, Calculator, BarChart3, Heart, Star, Moon, Sun, ArrowRight } from "lucide-react"
+import { useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 
 export default function Home() {
-  const { data: session } = useSession()
+  const { user } = useAuth()
+  const { success } = useNotification()
+  const searchParams = useSearchParams()
+
+  // Show welcome messages for users
+  useEffect(() => {
+    const isNewUser = searchParams.get('welcome')
+    const isLogin = searchParams.get('login')
+    
+    if (isNewUser === 'true' && user) {
+      success(`مرحباً ${user.name}! تم إنشاء حسابك بنجاح. ابدأ رحلتك الروحية الآن.`)
+    } else if (isLogin === 'true' && user) {
+      success(`مرحباً بعودتك ${user.name}! استمر في رحلتك الروحية.`)
+    }
+  }, [searchParams, user, success])
 
   const features = [
     {
@@ -111,7 +128,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.9 }}
             className="flex flex-col sm:flex-row gap-6 justify-center items-center"
           >
-            {session ? (
+            {user ? (
               <Link
                 href="/dashboard"
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl"
@@ -124,7 +141,7 @@ export default function Home() {
                   href="/auth/signup"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl"
                 >
-                  القرآن الكريم
+                  إنشاء حساب
                 </Link>
                 <Link
                   href="/auth/signin"
@@ -318,7 +335,7 @@ export default function Home() {
                   <p className="text-muted-foreground mb-6">
                     انضم إلى آلاف المسلمين الذين يستخدمون أذكار بالفعل لتعزيز ممارستهم الروحية.
                   </p>
-                  {!session && (
+                  {!user && (
                     <Link
                       href="/auth/signup"
                       className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors inline-block"

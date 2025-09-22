@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/contexts/AuthContext"
 import { motion } from "framer-motion"
 import { 
   BookOpen, 
@@ -40,27 +40,34 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession()
+  const { user, isLoading } = useAuth()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (user) {
       fetchDashboardStats()
     }
-  }, [status])
+  }, [user])
 
   const fetchDashboardStats = async (isRefresh = false) => {
     try {
       if (isRefresh) {
         setRefreshing(true)
       }
-      const response = await fetch('/api/dashboard/stats')
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data)
+      
+      // For localStorage-based auth, create mock stats
+      const mockStats: DashboardStats = {
+        totalAzkarCompleted: 0,
+        totalTasbihCount: 0,
+        streakDays: 0,
+        todayAzkarProgress: [],
+        recentTasbihCounts: [],
+        bookmarkedAzkar: []
       }
+      
+      setStats(mockStats)
     } catch (error) {
       console.error('Error fetching dashboard stats:', error)
     } finally {
@@ -75,7 +82,7 @@ export default function DashboardPage() {
     fetchDashboardStats(true)
   }
 
-  if (status === "loading" || loading) {
+  if (isLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -83,7 +90,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (status === "unauthenticated") {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -143,7 +150,7 @@ export default function DashboardPage() {
                 transition={{ duration: 0.6 }}
                 className="text-3xl md:text-4xl font-bold text-foreground mb-2"
               >
-                مرحباً بعودتك، {session?.user?.name}!
+                مرحباً بعودتك، {user?.name}!
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}

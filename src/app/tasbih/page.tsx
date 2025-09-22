@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/contexts/AuthContext"
 import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { RotateCcw, Save, History, Target, Trophy, Star, Zap, Heart, Crown, Sparkles, Quote, ArrowRight } from "lucide-react"
@@ -222,7 +222,7 @@ const getInitialTasbihOptions = (): TasbihOption[] => [
 ]
 
 function TasbihContent() {
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const searchParams = useSearchParams()
   const [tasbihOptions, setTasbihOptions] = useState<TasbihOption[]>(getInitialTasbihOptions())
   const [selectedTasbih, setSelectedTasbih] = useState<TasbihOption>(getInitialTasbihOptions()[0])
@@ -243,10 +243,10 @@ function TasbihContent() {
   const [currentTasbihIndex, setCurrentTasbihIndex] = useState(0)
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetchSavedCounts()
     }
-  }, [session])
+  }, [user])
 
   // Handle URL parameter for specific tasbih option
   useEffect(() => {
@@ -289,10 +289,12 @@ function TasbihContent() {
 
   const fetchSavedCounts = async () => {
     try {
-      const response = await fetch('/api/tasbih/counts')
-      if (response.ok) {
-        const data = await response.json()
-        setSavedCounts(data)
+      if (typeof window !== 'undefined') {
+        // For localStorage-based auth, we'll store counts in localStorage
+        const saved = localStorage.getItem('azkar-tasbih-counts')
+        if (saved) {
+          setSavedCounts(JSON.parse(saved))
+        }
       }
     } catch (error) {
       console.error('Error fetching saved counts:', error)
@@ -361,27 +363,27 @@ function TasbihContent() {
   }
 
   const autoSaveProgress = async () => {
-    if (!session) return
+    if (!user || typeof window === 'undefined') return
 
     try {
-      const response = await fetch('/api/tasbih/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          count,
-          tasbihId: selectedTasbih.id,
-          tasbihText: selectedTasbih.text,
-          tasbihTextAr: selectedTasbih.textAr,
-          completed: true,
-          target: target
-        }),
-      })
-
-      if (response.ok) {
-        await fetchSavedCounts()
+      // For localStorage-based auth, save to localStorage
+      const saved = localStorage.getItem('azkar-tasbih-counts') || '[]'
+      const counts = JSON.parse(saved)
+      
+      const newCount = {
+        id: Date.now().toString(),
+        count,
+        tasbihId: selectedTasbih.id,
+        tasbihText: selectedTasbih.text,
+        tasbihTextAr: selectedTasbih.textAr,
+        completed: true,
+        target: target,
+        date: new Date().toISOString()
       }
+      
+      counts.push(newCount)
+      localStorage.setItem('azkar-tasbih-counts', JSON.stringify(counts))
+      setSavedCounts(counts)
     } catch (error) {
       console.error('Error auto-saving progress:', error)
     }
@@ -465,26 +467,25 @@ function TasbihContent() {
   }
 
   const saveCount = async () => {
-    if (!session || count === 0) return
+    if (!user || count === 0 || typeof window === 'undefined') return
 
     try {
-      const response = await fetch('/api/tasbih/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          count,
-          tasbihId: selectedTasbih.id,
-          tasbihText: selectedTasbih.text,
-          tasbihTextAr: selectedTasbih.textAr
-        }),
-      })
-
-      if (response.ok) {
-        await fetchSavedCounts()
-        // Show success message or animation
+      // For localStorage-based auth, save to localStorage
+      const saved = localStorage.getItem('azkar-tasbih-counts') || '[]'
+      const counts = JSON.parse(saved)
+      
+      const newCount = {
+        id: Date.now().toString(),
+        count,
+        tasbihId: selectedTasbih.id,
+        tasbihText: selectedTasbih.text,
+        tasbihTextAr: selectedTasbih.textAr,
+        date: new Date().toISOString()
       }
+      
+      counts.push(newCount)
+      localStorage.setItem('azkar-tasbih-counts', JSON.stringify(counts))
+      setSavedCounts(counts)
     } catch (error) {
       console.error('Error saving count:', error)
     }
@@ -750,7 +751,7 @@ function TasbihContent() {
                   إعادة تعيين
                 </motion.button>
 
-                {session && (
+                {user && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -765,7 +766,7 @@ function TasbihContent() {
               </div>
             </div>
 
-            {!session && (
+            {!user && (
               <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
                 <p className="text-sm text-primary">
                   سجل الدخول لحفظ عداداتك وتتبع تقدمك
@@ -819,7 +820,7 @@ function TasbihContent() {
             </div>
 
             {/* History */}
-            {showHistory && session && (
+            {showHistory && user && (
               <div>
                 <h4 className="text-lg font-semibold text-foreground mb-4">
                   الأعداد الأخيرة
@@ -855,7 +856,7 @@ function TasbihContent() {
               </div>
             )}
 
-            {!session && (
+            {!user && (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">
                   سجل الدخول لعرض سجل تقدمك
