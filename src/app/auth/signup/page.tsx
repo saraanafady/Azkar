@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -13,7 +12,6 @@ export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { register } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,13 +31,21 @@ export default function SignUp() {
     }
 
     try {
-      const result = await register(name, email, password)
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      })
+
+      const result = await response.json()
 
       if (!result.success) {
         setError(result.error || "حدث خطأ. حاول مرة أخرى")
       } else {
-        // Redirect to home page with welcome message after successful registration
-        router.push("/dashboard")
+        // Redirect to signin page after successful registration
+        router.push("/auth/signin?message=registration-success")
       }
     } catch (error) {
       setError("حدث خطأ. حاول مرة أخرى")

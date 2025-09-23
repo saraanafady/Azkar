@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useAuth } from "@/contexts/AuthContext"
+import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
@@ -11,7 +11,6 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,13 +18,24 @@ export default function SignIn() {
     setError("")
 
     try {
-      const result = await login(email, password)
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
 
-      if (!result.success) {
-        setError(result.error || "Invalid email or password")
+      if (result?.error) {
+        setError("Invalid email or password")
+      } else if (result?.ok) {
+        // Get the session to verify login
+        const session = await getSession()
+        if (session) {
+          router.push("/")
+        } else {
+          setError("Login failed. Please try again.")
+        }
       } else {
-        // Redirect to home page after successful login
-        router.push("/")
+        setError("Login failed. Please try again.")
       }
     } catch (error) {
       setError("Something went wrong. Please try again.")

@@ -1,12 +1,37 @@
 import { NextAuthOptions } from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
-import { prisma } from "./prisma"
+
+// Simple in-memory user store for demo purposes
+// In production, this should be replaced with a proper database
+let users = [
+  {
+    id: 'demo-user-1',
+    email: 'demo@azkar.com',
+    password: 'demo123',
+    name: 'Demo User',
+    image: null,
+  },
+  {
+    id: 'demo-user-2', 
+    email: 'sara@azkar.com',
+    password: 'sara123',
+    name: 'Sara Ashraf',
+    image: null,
+  }
+]
+
+// Function to get users (this would be replaced with database queries in production)
+export function getUsers() {
+  return users
+}
+
+// Function to add user (this would be replaced with database operations in production)
+export function addUser(user: any) {
+  users.push(user)
+}
 
 export const authOptions: NextAuthOptions = {
-  // Disable adapter for now to avoid database connection issues
-  adapter: undefined,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -20,43 +45,17 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Use localStorage for authentication (works in both development and production)
-          if (typeof window !== 'undefined') {
-            const storedUsers = localStorage.getItem('azkar-users')
-            if (storedUsers) {
-              const users = JSON.parse(storedUsers)
-              const user = users.find((u: any) => u.email === credentials.email)
-              if (user && user.password === credentials.password) {
-                return {
-                  id: user.id,
-                  email: user.email,
-                  name: user.name,
-                  image: user.image,
-                }
-              }
-            }
-          }
+          // Find user in our simple user store
+          const currentUsers = getUsers()
+          const user = currentUsers.find(u => u.email === credentials.email)
           
-          // Fallback: create a demo user if none exists
-          if (typeof window !== 'undefined') {
-            const demoUser = {
-              id: 'demo-user-1',
-              email: credentials.email,
-              name: credentials.email.split('@')[0],
-              image: null,
+          if (user && user.password === credentials.password) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
             }
-            
-            // Store demo user in localStorage
-            const existingUsers = JSON.parse(localStorage.getItem('azkar-users') || '[]')
-            if (!existingUsers.find((u: any) => u.email === credentials.email)) {
-              existingUsers.push({
-                ...demoUser,
-                password: credentials.password
-              })
-              localStorage.setItem('azkar-users', JSON.stringify(existingUsers))
-            }
-            
-            return demoUser
           }
           
           return null
@@ -106,8 +105,8 @@ export const authOptions: NextAuthOptions = {
       }
     }
   },
-  debug: false, // Disable debug to reduce console logs
-  secret: 'demo-secret-for-development-change-in-production',
+  debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET || 'demo-secret-for-development-change-in-production',
   // Simplified error handling
   events: {
     async signIn({ user, account, profile, isNewUser }) {
