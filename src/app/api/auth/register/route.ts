@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUsers, addUser } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,30 +12,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get current users
-    const users = getUsers()
-    
-    // Check if user already exists
-    if (users.find(u => u.email === email)) {
-      return NextResponse.json(
-        { success: false, error: 'User already exists' },
-        { status: 400 }
-      )
-    }
-
-    // Create new user
-    const newUser = {
-      id: `user-${Date.now()}`,
-      name,
-      email,
-      password, // In production, hash this password
-      image: null,
-    }
-
-    // Add to users array
-    addUser(newUser)
-
-    return NextResponse.json({ success: true })
+    // For this demo, we only support the static test user
+    // In a real app, you would save to a database here
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Registration successful. Please use test@azkar.com / test123 to sign in.' 
+    })
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json(

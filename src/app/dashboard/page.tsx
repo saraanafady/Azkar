@@ -1,32 +1,41 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useAuth } from "@/contexts/AuthContext"
-import { BookOpen, Calculator, Target, TrendingUp, Clock, CheckCircle, RefreshCw } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { BookOpen, Calculator, Target, TrendingUp } from "lucide-react"
 import Link from "next/link"
-import { ProgressTracker, UserProgress } from "@/lib/progress-tracker"
 
-export default function SimpleDashboard() {
-  const { user, isLoading } = useAuth()
-  const [progress, setProgress] = useState<UserProgress | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
+interface User {
+  id: string
+  email: string
+  name: string
+  image?: string
+}
 
-  const loadProgress = () => {
-    if (user) {
-      const userProgress = ProgressTracker.getProgress(user.id)
-      setProgress(userProgress)
-      ProgressTracker.updateStreak(user.id)
-    }
-  }
+export default function Dashboard() {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
-    loadProgress()
-  }, [user])
+    // Check if user is in localStorage
+    const storedUser = localStorage.getItem('azkar-user')
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        setUser(userData)
+      } catch (error) {
+        console.error('Error parsing stored user:', error)
+        localStorage.removeItem('azkar-user')
+      }
+    }
+    setIsLoading(false)
+  }, [])
 
-  const handleRefresh = () => {
-    setRefreshing(true)
-    loadProgress()
-    setTimeout(() => setRefreshing(false), 500)
+  const handleLogout = () => {
+    localStorage.removeItem('azkar-user')
+    setUser(null)
+    router.push('/auth/signin')
   }
 
   if (isLoading) {
@@ -45,25 +54,15 @@ export default function SimpleDashboard() {
             مرحباً بك في لوحة تحكم الأذكار
           </h1>
           <p className="text-muted-foreground mb-6">
-            أنت تشاهد النسخة التجريبية. سجل الدخول للوصول إلى بياناتك الشخصية.
+            يرجى تسجيل الدخول للوصول إلى لوحة التحكم.
           </p>
-          <div className="space-x-4 p-5">
-          <span className="w-full p-5">
+          <div className="space-x-4">
             <Link
               href="/auth/signin"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors p-5 w-full"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors"
             >
               تسجيل الدخول
             </Link>
-            </span>
-            <span>
-            <Link
-              href="/auth/signup"
-              className="bg-success hover:bg-success/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors p-5"
-            >
-              إنشاء حساب
-            </Link>
-            </span>
           </div>
         </div>
       </div>
@@ -74,23 +73,35 @@ export default function SimpleDashboard() {
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+              مرحباً بعودتك، {user.name}!
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              إليك نظرة عامة على تقدمك الروحي
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+          >
+            تسجيل الخروج
+          </button>
+        </div>
+
+        {/* User Info Card */}
+        <div className="bg-card rounded-xl shadow-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-foreground mb-4">معلومات المستخدم</h2>
+          <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                مرحباً بعودتك، {user?.name}!
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                إليك نظرة عامة على تقدمك الروحي
-              </p>
+              <p className="text-sm font-medium text-muted-foreground">الاسم</p>
+              <p className="text-lg text-foreground">{user.name}</p>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="p-3 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-            </button>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">البريد الإلكتروني</p>
+              <p className="text-lg text-foreground">{user.email}</p>
+            </div>
           </div>
         </div>
 
@@ -105,9 +116,7 @@ export default function SimpleDashboard() {
                 <p className="text-sm font-medium text-muted-foreground">
                   الأذكار المكتملة
                 </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {progress?.totalAzkarCompleted || 0}
-                </p>
+                <p className="text-2xl font-bold text-foreground">0</p>
               </div>
             </div>
           </div>
@@ -121,9 +130,7 @@ export default function SimpleDashboard() {
                 <p className="text-sm font-medium text-muted-foreground">
                   إجمالي السبحة
                 </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {progress?.totalTasbihCount || 0}
-                </p>
+                <p className="text-2xl font-bold text-foreground">0</p>
               </div>
             </div>
           </div>
@@ -137,9 +144,7 @@ export default function SimpleDashboard() {
                 <p className="text-sm font-medium text-muted-foreground">
                   أيام متتالية
                 </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {progress?.streakDays || 0}
-                </p>
+                <p className="text-2xl font-bold text-foreground">0</p>
               </div>
             </div>
           </div>
@@ -153,85 +158,11 @@ export default function SimpleDashboard() {
                 <p className="text-sm font-medium text-muted-foreground">
                   هذا الأسبوع
                 </p>
-                <p className="text-2xl font-bold text-foreground">
-                  {progress?.recentTasbihCounts.length || 0}
-                </p>
+                <p className="text-2xl font-bold text-foreground">0</p>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Recent Activity */}
-        {progress && (progress.recentTasbihCounts.length > 0 || progress.todayAzkarProgress.length > 0) && (
-          <div className="mb-8 bg-card rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center">
-              <Clock className="w-5 h-5 mr-2 text-primary" />
-              النشاط الأخير
-            </h3>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Recent Tasbih */}
-              {progress.recentTasbihCounts.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
-                    <Calculator className="w-4 h-4 mr-2 text-success" />
-                    آخر استخدام للسبحة
-                  </h4>
-                  <div className="space-y-2">
-                    {progress.recentTasbihCounts.slice(0, 3).map((tasbih) => (
-                      <div key={tasbih.id} className="flex items-center justify-between bg-muted rounded-lg p-3">
-                        <div className="flex items-center">
-                          <CheckCircle className="w-4 h-4 text-success mr-2" />
-                          <div>
-                            <p className="font-medium text-foreground" dir="rtl">
-                              {tasbih.textAr || tasbih.category || 'ذكر عام'}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(tasbih.date).toLocaleDateString('ar-SA')}
-                            </p>
-                          </div>
-                        </div>
-                        <span className="text-success font-bold">
-                          {tasbih.count}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Today's Azkar Progress */}
-              {progress.todayAzkarProgress.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-semibold text-foreground mb-3 flex items-center">
-                    <BookOpen className="w-4 h-4 mr-2 text-primary" />
-                    تقدم اليوم في الأذكار
-                  </h4>
-                  <div className="space-y-2">
-                    {progress.todayAzkarProgress.slice(0, 3).map((azkar, index) => (
-                      <div key={index} className="flex items-center justify-between bg-muted rounded-lg p-3">
-                        <div className="flex items-center">
-                          <CheckCircle className="w-4 h-4 text-primary mr-2" />
-                          <div>
-                            <p className="font-medium text-foreground">
-                              {azkar.categoryName}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {azkar.completed}/{azkar.total} مكتمل
-                            </p>
-                          </div>
-                        </div>
-                        <span className="text-primary font-bold">
-                          {Math.round(azkar.percentage)}%
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-3 gap-6">
@@ -240,8 +171,8 @@ export default function SimpleDashboard() {
             className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
           >
             <BookOpen className="w-8 h-8 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold mb-2">Browse Azkar</h3>
-            <p className="text-sm opacity-90">Explore our collection of authentic azkar</p>
+            <h3 className="text-lg font-semibold mb-2">تصفح الأذكار</h3>
+            <p className="text-sm opacity-90">استكشف مجموعة الأذكار الأصيلة</p>
           </Link>
 
           <Link
@@ -249,8 +180,8 @@ export default function SimpleDashboard() {
             className="bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70 text-white rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
           >
             <Calculator className="w-8 h-8 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold mb-2">Digital Tasbih</h3>
-            <p className="text-sm opacity-90">Use our modern tasbih counter</p>
+            <h3 className="text-lg font-semibold mb-2">السبحة الرقمية</h3>
+            <p className="text-sm opacity-90">استخدم عداد السبحة الحديث</p>
           </Link>
 
           <Link
@@ -258,8 +189,8 @@ export default function SimpleDashboard() {
             className="bg-gradient-to-r from-info to-info/80 hover:from-info/90 hover:to-info/70 text-white rounded-xl p-6 text-center transition-all duration-300 hover:shadow-lg"
           >
             <Target className="w-8 h-8 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold mb-2">Set Goals</h3>
-            <p className="text-sm opacity-90">Track your daily dhikr goals</p>
+            <h3 className="text-lg font-semibold mb-2">تحديد الأهداف</h3>
+            <p className="text-sm opacity-90">تتبع أهداف الذكر اليومية</p>
           </Link>
         </div>
       </div>
