@@ -41,6 +41,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials:', { email: !!credentials?.email, password: !!credentials?.password })
           return null
         }
 
@@ -49,15 +50,24 @@ export const authOptions: NextAuthOptions = {
           const currentUsers = getUsers()
           const user = currentUsers.find(u => u.email === credentials.email)
           
+          console.log('User lookup:', { 
+            email: credentials.email, 
+            userFound: !!user, 
+            passwordMatch: user ? user.password === credentials.password : false 
+          })
+          
           if (user && user.password === credentials.password) {
-            return {
+            const userObject = {
               id: user.id,
               email: user.email,
               name: user.name,
               image: user.image,
             }
+            console.log('Authentication successful for:', user.email)
+            return userObject
           }
           
+          console.log('Authentication failed for:', credentials.email)
           return null
         } catch (error) {
           console.error('Authentication error:', error)

@@ -18,26 +18,35 @@ export default function SignIn() {
     setError("")
 
     try {
+      console.log('Attempting sign in with:', { email, password: '***' })
+      
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       })
 
+      console.log('Sign in result:', result)
+
       if (result?.error) {
+        console.error('Sign in error:', result.error)
         setError("Invalid email or password")
       } else if (result?.ok) {
+        console.log('Sign in successful, getting session...')
         // Get the session to verify login
         const session = await getSession()
+        console.log('Session after sign in:', session)
         if (session) {
           router.push("/")
         } else {
           setError("Login failed. Please try again.")
         }
       } else {
+        console.log('Sign in failed with result:', result)
         setError("Login failed. Please try again.")
       }
     } catch (error) {
+      console.error('Sign in exception:', error)
       setError("Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)
