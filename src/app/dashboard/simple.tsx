@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext"
 import Link from "next/link"
+import { BookOpen, Calculator, Target, TrendingUp } from "lucide-react"
 
 export default function SimpleDashboard() {
   const { user, isLoading } = useAuth()
