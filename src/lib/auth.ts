@@ -1,14 +1,23 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-// Static test user - no database needed
-const TEST_USER = {
-  id: 'test-user-1',
-  email: 'test@azkar.com',
-  password: 'test123',
-  name: 'Test User',
-  image: null,
-}
+// Static test users - no database needed
+const TEST_USERS = [
+  {
+    id: 'test-user-1',
+    email: 'test@azkar.com',
+    password: 'test123',
+    name: 'Test User',
+    image: null,
+  },
+  {
+    id: 'sara-user-1',
+    email: 'sara@gmail.com',
+    password: '1234',
+    name: 'Sara',
+    image: null,
+  }
+]
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -19,20 +28,29 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('Authorize called with:', { email: credentials?.email, hasPassword: !!credentials?.password })
+        
         if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials')
           return null
         }
 
-        // Check against static test user
-        if (credentials.email === TEST_USER.email && credentials.password === TEST_USER.password) {
+        // Check against all test users
+        const user = TEST_USERS.find(u => 
+          u.email === credentials.email && u.password === credentials.password
+        )
+        
+        if (user) {
+          console.log('Credentials match, returning user:', user.email)
           return {
-            id: TEST_USER.id,
-            email: TEST_USER.email,
-            name: TEST_USER.name,
-            image: TEST_USER.image,
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
           }
         }
         
+        console.log('Credentials do not match any test user')
         return null
       }
     })
@@ -42,6 +60,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      console.log('JWT callback:', { tokenId: token.id, userId: user?.id })
       if (user) {
         token.id = user.id
         token.email = user.email
@@ -51,6 +70,7 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
+      console.log('Session callback:', { sessionUser: session.user?.email, tokenId: token.id })
       if (token) {
         session.user = {
           id: token.id as string,
@@ -62,27 +82,24 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async signIn({ user, account }) {
+      console.log('SignIn callback:', { userEmail: user.email, provider: account?.provider })
       return account?.provider === 'credentials'
     }
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // Enable debug mode
   secret: process.env.NEXTAUTH_SECRET || 'demo-secret-for-development-change-in-production',
   // Simplified error handling
   events: {
     async signIn({ user, account, profile, isNewUser }) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Sign in successful:', { email: user.email, provider: account?.provider })
-      }
+      console.log('Sign in successful:', { email: user.email, provider: account?.provider })
     },
     async signOut() {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Sign out successful')
-      }
+      console.log('Sign out successful')
     },
   },
   // Add error pages
   pages: {
     signIn: "/auth/signin",
-    error: "/auth/error", // Add error page
+    error: "/auth/error",
   },
 }
