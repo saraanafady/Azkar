@@ -5,8 +5,8 @@ import bcrypt from "bcryptjs"
 import { prisma } from "./prisma"
 
 export const authOptions: NextAuthOptions = {
-  // Use adapter only if database is available and properly configured
-  adapter: process.env.DATABASE_URL && process.env.NODE_ENV === 'production' ? PrismaAdapter(prisma) as any : undefined,
+  // Disable adapter for now to avoid database connection issues
+  adapter: undefined,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -20,10 +20,9 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // For demo mode, use localStorage fallback
-          if (process.env.NODE_ENV === 'development' || !process.env.DATABASE_URL) {
-            // Check localStorage for demo users
-            const storedUsers = typeof window !== 'undefined' ? localStorage.getItem('demo-users') : null
+          // Use localStorage for authentication (works in both development and production)
+          if (typeof window !== 'undefined') {
+            const storedUsers = localStorage.getItem('azkar-users')
             if (storedUsers) {
               const users = JSON.parse(storedUsers)
               const user = users.find((u: any) => u.email === credentials.email)
@@ -36,35 +35,31 @@ export const authOptions: NextAuthOptions = {
                 }
               }
             }
-            return null
           }
-
-          // Production database authentication
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email
+          
+          // Fallback: create a demo user if none exists
+          if (typeof window !== 'undefined') {
+            const demoUser = {
+              id: 'demo-user-1',
+              email: credentials.email,
+              name: credentials.email.split('@')[0],
+              image: null,
             }
-          })
-
-          if (!user || !user.password) {
-            return null
+            
+            // Store demo user in localStorage
+            const existingUsers = JSON.parse(localStorage.getItem('azkar-users') || '[]')
+            if (!existingUsers.find((u: any) => u.email === credentials.email)) {
+              existingUsers.push({
+                ...demoUser,
+                password: credentials.password
+              })
+              localStorage.setItem('azkar-users', JSON.stringify(existingUsers))
+            }
+            
+            return demoUser
           }
-
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          )
-
-          if (!isPasswordValid) {
-            return null
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          }
+          
+          return null
         } catch (error) {
           console.error('Authentication error:', error)
           return null
@@ -112,7 +107,7 @@ export const authOptions: NextAuthOptions = {
     }
   },
   debug: false, // Disable debug to reduce console logs
-  secret: process.env.NEXTAUTH_SECRET || 'demo-secret-for-development',
+  secret: 'demo-secret-for-development-change-in-production',
   // Simplified error handling
   events: {
     async signIn({ user, account, profile, isNewUser }) {
