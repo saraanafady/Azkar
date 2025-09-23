@@ -28,20 +28,30 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        console.log('Authorize called with:', { email: credentials?.email, hasPassword: !!credentials?.password })
+        console.log('=== AUTHORIZE DEBUG ===')
+        console.log('Received credentials:', { 
+          email: credentials?.email, 
+          password: credentials?.password,
+          hasEmail: !!credentials?.email,
+          hasPassword: !!credentials?.password
+        })
+        console.log('Available test users:', TEST_USERS.map(u => ({ email: u.email, password: u.password })))
         
         if (!credentials?.email || !credentials?.password) {
-          console.log('Missing credentials')
+          console.log('Missing credentials - returning null')
           return null
         }
 
         // Check against all test users
-        const user = TEST_USERS.find(u => 
-          u.email === credentials.email && u.password === credentials.password
-        )
+        const user = TEST_USERS.find(u => {
+          const emailMatch = u.email === credentials.email
+          const passwordMatch = u.password === credentials.password
+          console.log(`Checking user ${u.email}: emailMatch=${emailMatch}, passwordMatch=${passwordMatch}`)
+          return emailMatch && passwordMatch
+        })
         
         if (user) {
-          console.log('Credentials match, returning user:', user.email)
+          console.log('✅ CREDENTIALS MATCH! Returning user:', user.email)
           return {
             id: user.id,
             email: user.email,
@@ -50,7 +60,7 @@ export const authOptions: NextAuthOptions = {
           }
         }
         
-        console.log('Credentials do not match any test user')
+        console.log('❌ Credentials do not match any test user')
         return null
       }
     })
