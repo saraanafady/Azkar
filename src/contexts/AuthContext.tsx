@@ -43,31 +43,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(status === 'loading')
   }, [session, status])
 
-  // Fallback to localStorage for non-NextAuth users
+  // Handle hydration properly - only run on client side
   useEffect(() => {
-    if (status === 'unauthenticated' && typeof window !== 'undefined') {
+    if (typeof window === 'undefined') return
+    
+    if (status === 'unauthenticated') {
       const savedUser = localStorage.getItem('azkar-user')
       if (savedUser) {
         try {
           const parsedUser = JSON.parse(savedUser)
           setUser(parsedUser)
-          setIsLoading(false)
         } catch (error) {
           console.error('Error parsing saved user:', error)
           localStorage.removeItem('azkar-user')
-          setIsLoading(false)
         }
-      } else {
-        setIsLoading(false)
       }
+      setIsLoading(false)
     }
   }, [status])
 
   // Save user to localStorage whenever user changes (for non-NextAuth users)
   useEffect(() => {
-    if (typeof window !== 'undefined' && user && !session?.user) {
+    if (typeof window === 'undefined') return
+    
+    if (user && !session?.user) {
       localStorage.setItem('azkar-user', JSON.stringify(user))
-    } else if (typeof window !== 'undefined' && !user) {
+    } else if (!user) {
       localStorage.removeItem('azkar-user')
     }
   }, [user, session])
@@ -122,6 +123,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fallback registration using localStorage
   const registerWithLocalStorage = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
+      if (typeof window === 'undefined') {
+        return { success: false, error: 'Not available on server' }
+      }
+
       // Get existing users
       const users = JSON.parse(localStorage.getItem('azkar-users') || '[]')
       
