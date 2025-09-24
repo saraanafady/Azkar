@@ -1,79 +1,28 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
-
-// Mock data for when database is not available
-const mockCategories = [
-  {
-    id: "1",
-    name: "Morning",
-    nameAr: "أذكار الصباح",
-    description: "Morning remembrance and supplications",
-    descriptionAr: "أذكار الصباح والدعوات",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    _count: {
-      azkar: 3
-    }
-  },
-  {
-    id: "2",
-    name: "Evening",
-    nameAr: "أذكار المساء",
-    description: "Evening remembrance and supplications",
-    descriptionAr: "أذكار المساء والدعوات",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    _count: {
-      azkar: 2
-    }
-  },
-  {
-    id: "3",
-    name: "Prayer",
-    nameAr: "أذكار الصلاة",
-    description: "Remembrance during and after prayer",
-    descriptionAr: "أذكار الصلاة وبعدها",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    _count: {
-      azkar: 2
-    }
-  },
-  {
-    id: "4",
-    name: "General",
-    nameAr: "أذكار عامة",
-    description: "General remembrance and supplications",
-    descriptionAr: "أذكار عامة ودعوات",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    _count: {
-      azkar: 2
-    }
-  }
-]
+import { LocalStorageData } from "@/lib/localStorage-data"
 
 export async function GET() {
   try {
-    const categories = await prisma.azkarCategory.findMany({
-      include: {
-        _count: {
-          select: {
-            azkar: true
-          }
-        }
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    })
-
-    return NextResponse.json(categories)
-  } catch (error) {
-    console.error('Error fetching categories from database:', error)
-    console.log('Returning mock data instead')
+    // Initialize default data if needed
+    LocalStorageData.initializeDefaultData()
     
-    // Return mock data when database is not available
-    return NextResponse.json(mockCategories)
+    const categories = LocalStorageData.getCategories()
+    const azkar = LocalStorageData.getAzkar()
+
+    // Add count of azkar for each category
+    const categoriesWithCount = categories.map(category => ({
+      ...category,
+      _count: {
+        azkar: azkar.filter(azkar => azkar.categoryId === category.id).length
+      }
+    }))
+
+    return NextResponse.json(categoriesWithCount)
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch categories' },
+      { status: 500 }
+    )
   }
 }

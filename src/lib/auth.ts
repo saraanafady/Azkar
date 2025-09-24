@@ -1,7 +1,6 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { LocalStorageAuth } from '@/lib/localStorage-auth'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -26,39 +25,28 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Find user in database
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email }
-          })
-
-          if (!user) {
-            console.log('❌ User not found in database')
+          // Verify user using localStorage
+          const result = await LocalStorageAuth.verifyUser(credentials.email, credentials.password)
+          
+          if (!result.success) {
+            console.log(`❌ Authentication failed: ${result.error}`)
             return null
           }
 
-          if (!user.password) {
-            console.log('❌ User has no password set')
-            return null
-          }
-
-          // Verify password
-          const passwordMatch = await bcrypt.compare(credentials.password, user.password)
-          console.log(`Password verification for ${user.email}: ${passwordMatch}`)
-
-          if (passwordMatch) {
-            console.log('✅ CREDENTIALS MATCH! Returning user:', user.email)
+          if (result.user) {
+            console.log('✅ CREDENTIALS MATCH! Returning user:', result.user.email)
             return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              image: user.image,
+              id: result.user.id,
+              email: result.user.email,
+              name: result.user.name,
+              image: null,
             }
           } else {
-            console.log('❌ Password does not match')
+            console.log('❌ No user returned from verification')
             return null
           }
         } catch (error) {
-          console.error('Database error during authentication:', error)
+          console.error('Authentication error:', error)
           return null
         }
       }

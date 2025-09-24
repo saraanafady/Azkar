@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { LocalStorageAuth } from '@/lib/localStorage-auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,46 +30,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
+    // Create user using localStorage
+    const result = await LocalStorageAuth.createUser(name, email, password)
 
-    if (existingUser) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'User with this email already exists' },
+        { success: false, error: result.error },
         { status: 400 }
       )
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // Create the user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-      }
-    })
-
-    console.log('✅ User registered successfully:', user.email)
+    console.log('✅ User registered successfully:', result.user?.email)
 
     return NextResponse.json({ 
       success: true, 
       message: 'Registration successful. You can now sign in.',
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email
-      }
+      user: result.user
     })
   } catch (error) {
     console.error('Registration error:', error)

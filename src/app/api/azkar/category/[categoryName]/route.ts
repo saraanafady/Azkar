@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { completeAzkarData } from "@/lib/azkar-data"
+import { LocalStorageData } from "@/lib/localStorage-data"
 
 export async function GET(
   request: NextRequest,
@@ -8,18 +8,15 @@ export async function GET(
   try {
     const { categoryName } = await params
 
-    // Find the category in the data structure
-    let category: any = null
-    let azkar: any[] = []
+    // Initialize default data if needed
+    LocalStorageData.initializeDefaultData()
 
-    // Check each category type
-    for (const [key, data] of Object.entries(completeAzkarData)) {
-      if (data.category.name.toLowerCase() === categoryName.toLowerCase()) {
-        category = data.category
-        azkar = data.azkar
-        break
-      }
-    }
+    // Find the category
+    const categories = LocalStorageData.getCategories()
+    const category = categories.find(cat => 
+      cat.name.toLowerCase() === categoryName.toLowerCase() ||
+      cat.id.toLowerCase() === categoryName.toLowerCase()
+    )
 
     if (!category) {
       return NextResponse.json(
@@ -27,6 +24,9 @@ export async function GET(
         { status: 404 }
       )
     }
+
+    // Get azkar for this category
+    const azkar = LocalStorageData.getAzkarByCategory(category.id)
 
     return NextResponse.json({
       category,
