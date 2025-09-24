@@ -1,20 +1,17 @@
 import { NextResponse } from "next/server"
-import { ServerDataStorage } from "@/lib/server-data"
+import { completeAzkarData } from "@/lib/azkar-data"
 
 export async function GET() {
   try {
-    const categories = ServerDataStorage.getCategories()
-    const azkar = ServerDataStorage.getAzkar()
-
-    // Add count of azkar for each category
-    const categoriesWithCount = categories.map(category => ({
-      ...category,
+    // Extract categories from complete data
+    const categories = Object.values(completeAzkarData).map(data => ({
+      ...data.category,
       _count: {
-        azkar: azkar.filter(azkar => azkar.categoryId === category.id).length
+        azkar: data.azkar.length
       }
     }))
 
-    return NextResponse.json(categoriesWithCount)
+    return NextResponse.json(categories)
   } catch (error) {
     console.error('Error fetching categories:', error)
     return NextResponse.json(

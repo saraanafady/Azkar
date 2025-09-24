@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { BookOpen, Calculator, Target, TrendingUp } from "lucide-react"
+import { BookOpen, Calculator, Target, TrendingUp, RefreshCw } from "lucide-react"
 import Link from "next/link"
 
 interface User {
@@ -12,30 +13,85 @@ interface User {
   image?: string
 }
 
+interface DashboardStats {
+  totalAzkarCompleted: number
+  totalTasbihCount: number
+  streakDays: number
+  todayAzkarProgress: Array<{
+    categoryName: string
+    completed: number
+    total: number
+    percentage: number
+  }>
+  recentTasbihCounts: Array<{
+    id: string
+    count: number
+    date: string
+  }>
+  bookmarkedAzkar: Array<{
+    id: string
+    title: string
+    titleAr: string
+    categoryName: string
+  }>
+}
+
 export default function Dashboard() {
+  const { data: session, status } = useSession()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    // Check if user is in localStorage
-    const storedUser = localStorage.getItem('azkar-user')
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser)
-        setUser(userData)
-      } catch (error) {
-        console.error('Error parsing stored user:', error)
-        localStorage.removeItem('azkar-user')
-      }
+    if (status === 'loading') {
+      setIsLoading(true)
+    } else if (status === 'authenticated' && session?.user) {
+      setUser({
+        id: session.user.id || session.user.email || '',
+        email: session.user.email || '',
+        name: session.user.name || '',
+        image: session.user.image || undefined
+      })
+      fetchStats()
+      setIsLoading(false)
+    } else if (status === 'unauthenticated') {
+      setUser(null)
+      setIsLoading(false)
     }
-    setIsLoading(false)
-  }, [])
+  }, [session, status])
 
-  const handleLogout = () => {
-    localStorage.removeItem('azkar-user')
-    setUser(null)
-    router.push('/auth/signin')
+  const fetchStats = async () => {
+    try {
+      console.log('🔄 Fetching dashboard stats...')
+      const response = await fetch('/api/dashboard/stats')
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data)
+        console.log('✅ Dashboard stats loaded:', data)
+      } else {
+        console.error('❌ Failed to fetch stats:', response.status, response.statusText)
+      }
+    } catch (error) {
+      console.error('❌ Error fetching stats:', error)
+    }
+  }
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' })
+  }
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await fetchStats()
+      console.log('✅ Dashboard stats refreshed successfully')
+    } catch (error) {
+      console.error('❌ Error refreshing dashboard stats:', error)
+    } finally {
+      setRefreshing(false)
+    }
   }
 
   if (isLoading) {
@@ -82,12 +138,21 @@ export default function Dashboard() {
               إليك نظرة عامة على تقدمك الروحي
             </p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-          >
-            تسجيل الخروج
-          </button>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-3 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            >
+              تسجيل الخروج
+            </button>
+          </div>
         </div>
 
         {/* User Info Card */}
@@ -116,7 +181,13 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-muted-foreground">
                   الأذكار المكتملة
                 </p>
-                <p className="text-2xl font-bold text-foreground">0</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {refreshing ? (
+                    <div className="animate-pulse bg-muted h-8 w-16 rounded"></div>
+                  ) : (
+                    stats?.totalAzkarCompleted || 0
+                  )}
+                </p>
               </div>
             </div>
           </div>
@@ -130,7 +201,9 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-muted-foreground">
                   إجمالي السبحة
                 </p>
-                <p className="text-2xl font-bold text-foreground">0</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {stats?.totalTasbihCount || 0}
+                </p>
               </div>
             </div>
           </div>
@@ -144,7 +217,9 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-muted-foreground">
                   أيام متتالية
                 </p>
-                <p className="text-2xl font-bold text-foreground">0</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {stats?.streakDays || 0}
+                </p>
               </div>
             </div>
           </div>
@@ -158,7 +233,9 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-muted-foreground">
                   هذا الأسبوع
                 </p>
-                <p className="text-2xl font-bold text-foreground">0</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {stats?.recentTasbihCounts?.length || 0}
+                </p>
               </div>
             </div>
           </div>
