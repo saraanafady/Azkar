@@ -259,7 +259,7 @@ export default function AzkarCategoryPage() {
     if (autoProgress) {
       setTimeout(() => {
         moveToNextAzkar()
-      }, 3000) // Wait 3 seconds to show quote
+      }, 2000) // Reduced to 2 seconds for faster flow
     }
   }
 
@@ -267,7 +267,7 @@ export default function AzkarCategoryPage() {
     const randomQuote = islamicQuotes[Math.floor(Math.random() * islamicQuotes.length)]
     setCurrentQuote(randomQuote)
     setShowQuote(true)
-    setTimeout(() => setShowQuote(false), 5000) // Show quote for 5 seconds
+    setTimeout(() => setShowQuote(false), 2500) // Show quote for 2.5 seconds (optimized for better UX)
   }
 
   const showCompletionCelebration = () => {
@@ -281,7 +281,7 @@ export default function AzkarCategoryPage() {
     const randomMessage = messages[Math.floor(Math.random() * messages.length)]
     setCelebrationMessage(randomMessage)
     setShowCelebration(true)
-    setTimeout(() => setShowCelebration(false), 3000)
+    setTimeout(() => setShowCelebration(false), 1500) // Reduced to 1.5 seconds for better UX
   }
 
   const moveToNextAzkar = () => {

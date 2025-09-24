@@ -1,23 +1,7 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-
-// Static test users - no database needed
-const TEST_USERS = [
-  {
-    id: 'test-user-1',
-    email: 'test@azkar.com',
-    password: 'test123',
-    name: 'Test User',
-    image: null,
-  },
-  {
-    id: 'sara-user-1',
-    email: 'sara@gmail.com',
-    password: '1234',
-    name: 'Sara',
-    image: null,
-  }
-]
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -35,33 +19,48 @@ export const authOptions: NextAuthOptions = {
           hasEmail: !!credentials?.email,
           hasPassword: !!credentials?.password
         })
-        console.log('Available test users:', TEST_USERS.map(u => ({ email: u.email, password: u.password })))
         
         if (!credentials?.email || !credentials?.password) {
           console.log('Missing credentials - returning null')
           return null
         }
 
-        // Check against all test users
-        const user = TEST_USERS.find(u => {
-          const emailMatch = u.email === credentials.email
-          const passwordMatch = u.password === credentials.password
-          console.log(`Checking user ${u.email}: emailMatch=${emailMatch}, passwordMatch=${passwordMatch}`)
-          return emailMatch && passwordMatch
-        })
-        
-        if (user) {
-          console.log('✅ CREDENTIALS MATCH! Returning user:', user.email)
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.image,
+        try {
+          // Find user in database
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
+          })
+
+          if (!user) {
+            console.log('❌ User not found in database')
+            return null
           }
+
+          if (!user.password) {
+            console.log('❌ User has no password set')
+            return null
+          }
+
+          // Verify password
+          const passwordMatch = await bcrypt.compare(credentials.password, user.password)
+          console.log(`Password verification for ${user.email}: ${passwordMatch}`)
+
+          if (passwordMatch) {
+            console.log('✅ CREDENTIALS MATCH! Returning user:', user.email)
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
+            }
+          } else {
+            console.log('❌ Password does not match')
+            return null
+          }
+        } catch (error) {
+          console.error('Database error during authentication:', error)
+          return null
         }
-        
-        console.log('❌ Credentials do not match any test user')
-        return null
       }
     })
   ],
