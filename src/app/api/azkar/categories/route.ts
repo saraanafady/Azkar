@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server"
-import { LocalStorageData } from "@/lib/localStorage-data"
+import { ServerDataStorage } from "@/lib/server-data"
 
 export async function GET() {
   try {
-    // Initialize default data if needed
-    LocalStorageData.initializeDefaultData()
-    
-    const categories = LocalStorageData.getCategories()
-    const azkar = LocalStorageData.getAzkar()
+    const categories = ServerDataStorage.getCategories()
+    const azkar = ServerDataStorage.getAzkar()
 
     // Add count of azkar for each category
     const categoriesWithCount = categories.map(category => ({

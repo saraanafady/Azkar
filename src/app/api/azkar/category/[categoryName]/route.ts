@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { LocalStorageData } from "@/lib/localStorage-data"
+import { ServerDataStorage } from "@/lib/server-data"
 
 export async function GET(
   request: NextRequest,
@@ -8,11 +8,8 @@ export async function GET(
   try {
     const { categoryName } = await params
 
-    // Initialize default data if needed
-    LocalStorageData.initializeDefaultData()
-
     // Find the category
-    const categories = LocalStorageData.getCategories()
+    const categories = ServerDataStorage.getCategories()
     const category = categories.find(cat => 
       cat.name.toLowerCase() === categoryName.toLowerCase() ||
       cat.id.toLowerCase() === categoryName.toLowerCase()
@@ -26,7 +23,7 @@ export async function GET(
     }
 
     // Get azkar for this category
-    const azkar = LocalStorageData.getAzkarByCategory(category.id)
+    const azkar = ServerDataStorage.getAzkarByCategory(category.id)
 
     return NextResponse.json({
       category,

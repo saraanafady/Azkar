@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { LocalStorageAuth } from '@/lib/localStorage-auth'
+import { ServerAuthStorage } from '@/lib/server-auth'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -25,8 +25,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Verify user using localStorage
-          const result = await LocalStorageAuth.verifyUser(credentials.email, credentials.password)
+          // Verify user using server-side storage
+          const result = await ServerAuthStorage.verifyUser(credentials.email, credentials.password)
           
           if (!result.success) {
             console.log(`❌ Authentication failed: ${result.error}`)
@@ -83,8 +83,8 @@ export const authOptions: NextAuthOptions = {
       return account?.provider === 'credentials'
     }
   },
-  debug: true, // Enable debug mode
-  secret: process.env.NEXTAUTH_SECRET || 'demo-secret-for-development-change-in-production',
+  debug: process.env.NODE_ENV === 'development', // Enable debug mode only in development
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development-only',
   // Simplified error handling
   events: {
     async signIn({ user, account, profile, isNewUser }) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { LocalStorageAuth } from '@/lib/localStorage-auth'
+import { ServerAuthStorage } from '@/lib/server-auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create user using localStorage
-    const result = await LocalStorageAuth.createUser(name, email, password)
+    // Create user using server-side storage
+    const result = await ServerAuthStorage.createUser(name, email, password)
 
     if (!result.success) {
       return NextResponse.json(
