@@ -183,7 +183,7 @@ export default function Dashboard() {
                 </p>
                 <p className="text-2xl font-bold text-foreground">
                   {refreshing ? (
-                    <div className="animate-pulse bg-muted h-8 w-16 rounded"></div>
+                    <span className="inline-block animate-pulse bg-muted h-8 w-16 rounded"></span>
                   ) : (
                     stats?.totalAzkarCompleted || 0
                   )}

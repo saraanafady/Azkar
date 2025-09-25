@@ -20,8 +20,8 @@ export const authOptions: NextAuthOptions = {
         })
         
         if (!credentials?.email || !credentials?.password) {
-          console.log('Missing credentials - returning null')
-          return null
+          console.log('Missing credentials - throwing error')
+          throw new Error('Missing credentials')
         }
 
         try {
@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
           
           if (!result.success) {
             console.log(`❌ Authentication failed: ${result.error}`)
-            return null
+            throw new Error(result.error || 'Invalid credentials')
           }
 
           if (result.user) {
@@ -43,11 +43,11 @@ export const authOptions: NextAuthOptions = {
             }
           } else {
             console.log('❌ No user returned from verification')
-            return null
+            throw new Error('Invalid credentials')
           }
         } catch (error) {
           console.error('Authentication error:', error)
-          return null
+          throw error
         }
       }
     })

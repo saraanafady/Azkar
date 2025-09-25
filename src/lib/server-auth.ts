@@ -1,5 +1,10 @@
 import bcrypt from 'bcryptjs'
 
+// Persist users across dev hot reloads using a global singleton
+const globalStore = globalThis as unknown as {
+  __azkarAuthUsers?: ServerUser[]
+}
+
 export interface ServerUser {
   id: string
   name: string
@@ -16,9 +21,14 @@ class ServerAuthStorage {
   static initialize() {
     if (this.initialized) return
     this.initialized = true
-    
-    // Add some default test users for production
-    // Note: These are pre-hashed passwords for demo purposes
+
+    // Reuse existing global store if available
+    if (globalStore.__azkarAuthUsers && Array.isArray(globalStore.__azkarAuthUsers)) {
+      this.users = globalStore.__azkarAuthUsers
+      return
+    }
+
+    // Seed defaults and save to global store
     this.users = [
       {
         id: 'test-user-1',
@@ -42,6 +52,8 @@ class ServerAuthStorage {
         createdAt: new Date().toISOString()
       }
     ]
+
+    globalStore.__azkarAuthUsers = this.users
   }
 
   static getUsers(): ServerUser[] {
@@ -73,6 +85,11 @@ class ServerAuthStorage {
 
       // Add to users array
       this.users.push(newUser)
+      if (Array.isArray(globalStore.__azkarAuthUsers)) {
+        globalStore.__azkarAuthUsers.push(newUser)
+      } else {
+        globalStore.__azkarAuthUsers = this.users
+      }
 
       console.log('✅ User created successfully:', newUser.email)
 

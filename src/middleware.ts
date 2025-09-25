@@ -7,17 +7,18 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow access to public routes
-        if (req.nextUrl.pathname.startsWith('/api/auth') ||
-            req.nextUrl.pathname === '/' ||
-            req.nextUrl.pathname.startsWith('/azkar') ||
-            req.nextUrl.pathname.startsWith('/tasbih') ||
-            req.nextUrl.pathname.startsWith('/auth') ||
-            req.nextUrl.pathname.startsWith('/dashboard')) {
+        // Always allow NextAuth endpoints and public pages
+        if (
+          req.nextUrl.pathname.startsWith('/api/auth') ||
+          req.nextUrl.pathname === '/' ||
+          req.nextUrl.pathname.startsWith('/azkar') ||
+          req.nextUrl.pathname.startsWith('/tasbih') ||
+          req.nextUrl.pathname.startsWith('/auth')
+        ) {
           return true
         }
-        
-        // Require authentication for other protected routes
+
+        // Require authentication for protected routes (e.g., dashboard and protected APIs)
         return !!token
       },
     },

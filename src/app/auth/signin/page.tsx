@@ -1,16 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
 export default function SignIn() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [message, setMessage] = useState("")
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const msg = searchParams.get('message')
+    const err = searchParams.get('error')
+    if (msg === 'registration-success') {
+      setMessage('تم إنشاء الحساب بنجاح. يمكنك تسجيل الدخول الآن.')
+    }
+    if (err === 'auth') {
+      setError('حدث خطأ في تسجيل الدخول. حاول مرة أخرى.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,6 +81,11 @@ export default function SignIn() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
               {error}
+            </div>
+          )}
+          {message && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+              {message}
             </div>
           )}
           <div className="space-y-4">
