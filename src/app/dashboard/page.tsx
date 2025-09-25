@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { BookOpen, Calculator, Target, TrendingUp, RefreshCw } from "lucide-react"
 import Link from "next/link"
+import { ProgressTracker } from "@/lib/progress-tracker"
 
 interface User {
   id: string
@@ -48,13 +49,13 @@ export default function Dashboard() {
     if (status === 'loading') {
       setIsLoading(true)
     } else if (status === 'authenticated' && session?.user) {
-      setUser({
+      const userData = {
         id: session.user.id || session.user.email || '',
         email: session.user.email || '',
         name: session.user.name || '',
         image: session.user.image || undefined
-      })
-      fetchStats()
+      }
+      setUser(userData)
       setIsLoading(false)
     } else if (status === 'unauthenticated') {
       setUser(null)
@@ -62,16 +63,64 @@ export default function Dashboard() {
     }
   }, [session, status])
 
+  // Fetch stats after user is set
+  useEffect(() => {
+    if (user && user.id) {
+      fetchStats()
+    }
+  }, [user])
+
   const fetchStats = async () => {
     try {
-      console.log('🔄 Fetching dashboard stats...')
-      const response = await fetch('/api/dashboard/stats')
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data)
-        console.log('✅ Dashboard stats loaded:', data)
+      console.log('🔄 Fetching dashboard stats for user:', user?.id)
+      
+      // Debug localStorage data
+      if (typeof window !== 'undefined') {
+        const progressData = localStorage.getItem('azkar-user-progress')
+        console.log('📦 Raw localStorage progress data:', progressData)
+        
+        const tasbihData = localStorage.getItem('azkar-tasbih-counts')
+        console.log('📦 Raw localStorage tasbih data:', tasbihData)
+      }
+      
+      // Get real progress data from ProgressTracker (client-side)
+      if (user && user.id) {
+        console.log('👤 Using user ID for progress:', user.id)
+        const progress = ProgressTracker.getProgress(user.id)
+        console.log('📊 ProgressTracker.getProgress result:', progress)
+        
+        // Calculate streak based on last activity
+        const today = new Date().toISOString().split('T')[0]
+        const lastActivity = progress.lastActivityDate || today
+        const daysSinceLastActivity = Math.floor(
+          (new Date(today).getTime() - new Date(lastActivity).getTime()) / (1000 * 60 * 60 * 24)
+        )
+        
+        // If user was active today or yesterday, maintain streak
+        const currentStreak = daysSinceLastActivity <= 1 ? progress.streakDays : 0
+
+        const realStats = {
+          totalAzkarCompleted: progress.totalAzkarCompleted,
+          totalTasbihCount: progress.totalTasbihCount,
+          streakDays: currentStreak,
+          todayAzkarProgress: progress.todayAzkarProgress,
+          recentTasbihCounts: progress.recentTasbihCounts.slice(0, 7), // Last 7 entries
+          bookmarkedAzkar: progress.bookmarkedAzkar
+        }
+        
+        setStats(realStats)
+        console.log('✅ Real dashboard stats loaded:', realStats)
       } else {
-        console.error('❌ Failed to fetch stats:', response.status, response.statusText)
+        console.log('⚠️ No user or user.id, using fallback')
+        // Fallback to API if no user
+        const response = await fetch('/api/dashboard/stats')
+        if (response.ok) {
+          const data = await response.json()
+          setStats(data)
+          console.log('✅ Dashboard stats loaded from API:', data)
+        } else {
+          console.error('❌ Failed to fetch stats:', response.status, response.statusText)
+        }
       }
     } catch (error) {
       console.error('❌ Error fetching stats:', error)
@@ -91,6 +140,36 @@ export default function Dashboard() {
       console.error('❌ Error refreshing dashboard stats:', error)
     } finally {
       setRefreshing(false)
+    }
+  }
+
+  const addTestProgress = () => {
+    if (user && user.id) {
+      console.log('🧪 Adding test progress data for user:', user.id)
+      ProgressTracker.updateAzkarProgress(user.id, 'Morning', 1, 1)
+      ProgressTracker.updateTasbihProgress(user.id, 33, 'Test', 'سبحان الله')
+      ProgressTracker.updateStreak(user.id)
+      console.log('✅ Test progress added, refreshing stats...')
+      setTimeout(() => fetchStats(), 100)
+    }
+  }
+
+  const debugLocalStorage = () => {
+    console.log('🔍 DEBUGGING LOCALSTORAGE:')
+    console.log('User ID:', user?.id)
+    console.log('All localStorage keys:', Object.keys(localStorage))
+    
+    // Check all progress-related keys
+    const keys = ['azkar-user-progress', 'azkar-tasbih-counts', 'azkar-user', 'azkar-users']
+    keys.forEach(key => {
+      const data = localStorage.getItem(key)
+      console.log(`📦 ${key}:`, data)
+    })
+    
+    // Check what ProgressTracker returns
+    if (user?.id) {
+      const progress = ProgressTracker.getProgress(user.id)
+      console.log('📊 ProgressTracker.getProgress result:', progress)
     }
   }
 
@@ -139,6 +218,20 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center space-x-4">
+            <button
+              onClick={debugLocalStorage}
+              className="p-3 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 transition-colors"
+              title="Debug localStorage"
+            >
+              🔍
+            </button>
+            <button
+              onClick={addTestProgress}
+              className="p-3 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-600 transition-colors"
+              title="Add test progress data"
+            >
+              🧪
+            </button>
             <button
               onClick={handleRefresh}
               disabled={refreshing}

@@ -246,7 +246,19 @@ export default function AzkarCategoryPage() {
   const handleCompletion = async (azkarId: string, azkarItem: Azkar) => {
     // Track progress for authenticated users
     if (user) {
+      console.log('🎯 Azkar completed! Updating progress for user:', user.id, 'category:', category?.name)
       ProgressTracker.updateAzkarProgress(user.id, category?.name || 'Unknown', 1, 1)
+      ProgressTracker.updateStreak(user.id) // Update streak on completion
+      
+      // Debug: Show current progress
+      const currentProgress = ProgressTracker.getProgress(user.id)
+      console.log('📊 Current progress after completion:', {
+        totalAzkarCompleted: currentProgress.totalAzkarCompleted,
+        todayProgress: currentProgress.todayAzkarProgress.length,
+        streak: currentProgress.streakDays
+      })
+    } else {
+      console.log('⚠️ No user found, progress not tracked')
     }
     
     // Show beautiful quote

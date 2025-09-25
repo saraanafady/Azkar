@@ -310,7 +310,17 @@ function TasbihContent() {
 
     // Track progress for authenticated users
     if (user) {
+      console.log('📿 Tasbih increment:', { userId: user.id, count: newCount, tasbih: selectedTasbih?.textAr })
       ProgressTracker.updateTasbihProgress(user.id, 1, 'Tasbih', selectedTasbih?.textAr)
+      
+      // Debug: Show current progress after increment
+      const currentProgress = ProgressTracker.getProgress(user.id)
+      console.log('📊 Progress after tasbih increment:', {
+        totalTasbihCount: currentProgress.totalTasbihCount,
+        recentCounts: currentProgress.recentTasbihCounts.length
+      })
+    } else {
+      console.log('⚠️ No user found for tasbih tracking')
     }
 
     // Check for completion
@@ -346,6 +356,22 @@ function TasbihContent() {
     // Add to daily completed if not already there
     if (!dailyCompleted.includes(selectedTasbih.id)) {
       setDailyCompleted(prev => [...prev, selectedTasbih.id])
+    }
+
+    // Update streak for authenticated users
+    if (user) {
+      console.log('🎯 Tasbih completion! Updating streak for user:', user.id)
+      ProgressTracker.updateStreak(user.id)
+      
+      // Debug: Show final progress
+      const finalProgress = ProgressTracker.getProgress(user.id)
+      console.log('📊 Final progress after tasbih completion:', {
+        totalTasbihCount: finalProgress.totalTasbihCount,
+        streak: finalProgress.streakDays,
+        recentCounts: finalProgress.recentTasbihCounts.length
+      })
+    } else {
+      console.log('⚠️ No user found for streak update')
     }
 
     // Auto-save progress

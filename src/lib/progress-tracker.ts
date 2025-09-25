@@ -107,7 +107,13 @@ export class ProgressTracker {
   }
 
   static updateTasbihProgress(userId: string, count: number, category?: string, textAr?: string): void {
+    console.log('🔄 ProgressTracker.updateTasbihProgress called:', { userId, count, category, textAr })
+    
     const progress = this.getOrCreateProgress(userId)
+    console.log('📊 Current progress before update:', {
+      totalTasbihCount: progress.totalTasbihCount,
+      recentCounts: progress.recentTasbihCounts.length
+    })
     
     const tasbihEntry: TasbihProgress = {
       id: Date.now().toString(),
@@ -126,7 +132,13 @@ export class ProgressTracker {
     // Update total tasbih count
     progress.totalTasbihCount += count
     
+    console.log('📊 Progress after update:', {
+      totalTasbihCount: progress.totalTasbihCount,
+      recentCounts: progress.recentTasbihCounts.length
+    })
+    
     this.saveProgress(userId, progress)
+    console.log('💾 Progress saved to localStorage')
   }
 
   static addBookmark(userId: string, azkar: { id: string, title: string, titleAr: string, categoryName: string }): void {
